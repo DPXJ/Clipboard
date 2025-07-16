@@ -276,7 +276,7 @@ function App() {
           </div>
         ) : (
           <>
-            <DataFilter onFilterChange={handleFilterChange} stats={stats} />
+            <DataFilter onFilterChange={handleFilterChange} stats={stats} filteredItems={filteredItems} />
             <div className="clipboard-grid">
               {filteredItems.map((item) => (
                 <ClipboardCard

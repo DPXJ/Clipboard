@@ -8,6 +8,7 @@ interface DataFilterProps {
     itemsByMonth: Record<string, number>;
     itemsByDevice: Record<string, number>;
   };
+  filteredItems: any[]; // 添加筛选后的数据
 }
 
 export interface FilterOptions {
@@ -17,7 +18,7 @@ export interface FilterOptions {
   tags?: string[];
 }
 
-const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats }) => {
+const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filteredItems }) => {
   const [filters, setFilters] = useState<FilterOptions>({});
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -34,6 +35,47 @@ const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats }) => {
 
   const clearFilters = () => {
     setFilters({});
+  };
+
+  // 导出筛选后的数据
+  const exportFilteredData = () => {
+    if (filteredItems.length === 0) {
+      alert('没有数据可导出');
+      return;
+    }
+
+    // 生成导出文件名
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+    const fileName = `clipboard_data_${timestamp}.txt`;
+
+    // 格式化数据内容
+    const exportContent = filteredItems.map((item, index) => {
+      const date = new Date(item.timestamp).toLocaleString('zh-CN');
+      const content = item.content;
+      
+      // 用分割线分隔不同内容
+      const separator = '\n' + '='.repeat(50) + '\n';
+      
+      return `${index + 1}. 时间: ${date}\n内容:\n${content}${index < filteredItems.length - 1 ? separator : ''}`;
+    }).join('');
+
+    // 添加文件头部信息
+    const header = `剪切板数据导出\n导出时间: ${now.toLocaleString('zh-CN')}\n筛选条件: ${JSON.stringify(filters, null, 2)}\n共导出 ${filteredItems.length} 条记录\n\n`;
+    const fullContent = header + exportContent;
+
+    // 创建并下载文件
+    const blob = new Blob([fullContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    console.log(`已导出 ${filteredItems.length} 条记录到文件: ${fileName}`);
   };
 
   const getMonthOptions = () => {
@@ -63,12 +105,22 @@ const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats }) => {
           <span>🔍 数据筛选</span>
           {hasActiveFilters && <span className="active-indicator">●</span>}
         </div>
-        <button 
-          className="expand-btn"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          {isExpanded ? '收起' : '展开'}
-        </button>
+        <div className="filter-actions-header">
+          <button 
+            className="export-btn"
+            onClick={exportFilteredData}
+            disabled={filteredItems.length === 0}
+            title="导出筛选后的数据为文本文件"
+          >
+            📥 导出数据 ({filteredItems.length})
+          </button>
+          <button 
+            className="expand-btn"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? '收起' : '展开'}
+          </button>
+        </div>
       </div>
 
       {isExpanded && (
@@ -122,7 +174,7 @@ const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats }) => {
               清除筛选
             </button>
             <div className="filter-stats">
-              共 {stats.totalItems} 条记录
+              共 {stats.totalItems} 条记录，筛选后 {filteredItems.length} 条
             </div>
           </div>
         </div>
