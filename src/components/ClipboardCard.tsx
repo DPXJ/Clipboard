@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Copy, Trash2, Check } from 'lucide-react';
+import { Copy, Trash2, Check, Tag, Monitor, Cloud } from 'lucide-react';
 import './ClipboardCard.css';
 
 interface ClipboardItem {
   id: string;
   content: string;
   timestamp: Date;
+  deviceId: string;
+  tags?: string[];
+  syncStatus: 'local' | 'synced' | 'failed';
 }
 
 interface ClipboardCardProps {
@@ -83,6 +86,20 @@ const ClipboardCard: React.FC<ClipboardCardProps> = ({ item, onDelete, isElectro
     }
   };
 
+  // 获取同步状态图标和颜色
+  const getSyncStatusInfo = () => {
+    switch (item.syncStatus) {
+      case 'synced':
+        return { icon: <Cloud size={12} />, color: '#4CAF50', text: '已同步' };
+      case 'failed':
+        return { icon: <Cloud size={12} />, color: '#f44336', text: '同步失败' };
+      default:
+        return { icon: <Cloud size={12} />, color: '#ff9800', text: '本地' };
+    }
+  };
+
+  const syncStatusInfo = getSyncStatusInfo();
+
   return (
     <div className="clipboard-card">
       <div className="card-header">
@@ -123,11 +140,32 @@ const ClipboardCard: React.FC<ClipboardCardProps> = ({ item, onDelete, isElectro
       </div>
       
       <div className="card-footer">
-        <div className="content-length">
-          字符数: {item.content.length}
+        <div className="footer-left">
+          <div className="content-length">
+            字符数: {item.content.length}
+          </div>
+          <div className="content-type">
+            {item.content.includes('\n') ? '多行文本' : '单行文本'}
+          </div>
         </div>
-        <div className="content-type">
-          {item.content.includes('\n') ? '多行文本' : '单行文本'}
+        <div className="footer-right">
+          <div className="device-info" title={`设备: ${item.deviceId}`}>
+            <Monitor size={12} />
+            <span>{item.deviceId.split('-')[0]}</span>
+          </div>
+          <div 
+            className="sync-status" 
+            title={syncStatusInfo.text}
+            style={{ color: syncStatusInfo.color }}
+          >
+            {syncStatusInfo.icon}
+          </div>
+          {item.tags && item.tags.length > 0 && (
+            <div className="tags-info" title={`标签: ${item.tags.join(', ')}`}>
+              <Tag size={12} />
+              <span>{item.tags.length}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

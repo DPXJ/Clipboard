@@ -1,13 +1,37 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, clipboard, globalShortcut } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, clipboard, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 let mainWindow;
 let tray;
 let isMonitoring = false;
 
+// 检测可用端口
+async function findAvailablePort() {
+  const net = require('net');
+  
+  for (let port = 5173; port <= 5180; port++) {
+    try {
+      await new Promise((resolve, reject) => {
+        const server = net.createServer();
+        server.listen(port, () => {
+          server.close();
+          resolve(port);
+        });
+        server.on('error', () => {
+          reject();
+        });
+      });
+      return port;
+    } catch (error) {
+      continue;
+    }
+  }
+  return 5173; // 默认端口
+}
+
 // 创建主窗口
-function createWindow() {
+async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -17,7 +41,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.cjs')
     },
     icon: path.join(__dirname, 'icon.png'),
     show: false,
@@ -31,7 +55,10 @@ function createWindow() {
 
   // 加载应用
   if (isDev) {
-    mainWindow.loadURL('http://localhost:5173');
+    // 直接加载Vite开发服务器
+    const url = 'http://localhost:5173';
+    console.log(`Loading app from: ${url}`);
+    mainWindow.loadURL(url);
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
@@ -40,6 +67,7 @@ function createWindow() {
   // 窗口准备好后显示
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    console.log('Electron window is ready and visible');
   });
 
   // 窗口关闭事件
@@ -230,4 +258,29 @@ app.on('web-contents-created', (event, contents) => {
       updateTrayMenu();
     }
   });
+});
+
+// 注册IPC处理器
+ipcMain.handle('get-clipboard-text', () => {
+  try {
+    console.log('主进程: 读取剪切板内容');
+    const text = clipboard.readText();
+    console.log('主进程: 剪切板内容:', text ? `"${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"` : '(空)');
+    return text;
+  } catch (error) {
+    console.error('主进程: 读取剪切板失败:', error);
+    return '';
+  }
+});
+
+ipcMain.handle('set-clipboard-text', (event, text) => {
+  try {
+    console.log('主进程: 设置剪切板内容:', text ? `"${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"` : '(空)');
+    clipboard.writeText(text);
+    console.log('主进程: 剪切板内容设置成功');
+    return true;
+  } catch (error) {
+    console.error('主进程: 设置剪切板失败:', error);
+    return false;
+  }
 }); 
