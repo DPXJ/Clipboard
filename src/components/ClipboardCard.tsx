@@ -11,16 +11,24 @@ interface ClipboardItem {
 interface ClipboardCardProps {
   item: ClipboardItem;
   onDelete: (id: string) => void;
+  isElectron?: boolean;
 }
 
-const ClipboardCard: React.FC<ClipboardCardProps> = ({ item, onDelete }) => {
+const ClipboardCard: React.FC<ClipboardCardProps> = ({ item, onDelete, isElectron = false }) => {
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // 复制内容到剪切板
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(item.content);
+      if (isElectron && window.electronAPI) {
+        // 使用Electron API复制
+        window.electronAPI.setClipboardText(item.content);
+      } else {
+        // 使用浏览器API复制
+        await navigator.clipboard.writeText(item.content);
+      }
+      
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
