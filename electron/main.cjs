@@ -187,13 +187,19 @@ function toggleMonitoring() {
 // 开始监控
 function startMonitoring() {
   console.log('开始监控剪切板...');
-  isMonitoring = true;
+  
+  // 如果已经在监控，先停止之前的监控
+  if (clipboardCheckInterval) {
+    clearInterval(clipboardCheckInterval);
+    clipboardCheckInterval = null;
+  }
   
   // 初始化时设置当前剪切板内容，但不触发通知
   try {
     const currentContent = clipboard.readText();
     if (currentContent && currentContent.trim()) {
       lastClipboardContent = currentContent.trim();
+      console.log('初始化剪切板内容:', lastClipboardContent.substring(0, 50) + '...');
     }
   } catch (error) {
     // 忽略错误

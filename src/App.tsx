@@ -41,16 +41,25 @@ function App() {
     if (electronDetected && window.electronAPI) {
       // 监听剪切板变化
       window.electronAPI.onClipboardChanged((content) => {
-        console.log('剪切板内容变化:', content);
+        console.log('前端收到剪切板内容变化:', content);
         if (content && content.trim()) {
           const newItem: ClipboardItem = {
-            id: Date.now().toString(),
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             content: content.trim(),
             timestamp: new Date(),
             deviceId: 'desktop-main',
             syncStatus: 'local'
           };
-          setClipboardItems(prev => [newItem, ...prev.slice(0, 9)]);
+          setClipboardItems(prev => {
+            // 检查是否已经存在相同内容的记录
+            const exists = prev.some(item => item.content === content.trim());
+            if (exists) {
+              console.log('内容已存在，跳过添加');
+              return prev;
+            }
+            console.log('添加新的剪切板记录');
+            return [newItem, ...prev.slice(0, 9)];
+          });
         }
       });
 
