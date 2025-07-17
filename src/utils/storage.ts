@@ -29,6 +29,12 @@ class LocalStorage {
   private readonly DEVICE_ID_KEY = 'device_id';
   private readonly LAST_CONTENT_KEY = 'last_clipboard_content';
   private lastContent: string = '';
+  
+  // 添加内存缓存
+  private cachedItems: ClipboardItem[] | null = null;
+  private cachedStats: any = null;
+  private lastLoadTime: number = 0;
+  private readonly CACHE_DURATION = 5000; // 缓存5秒
 
   // 获取设备ID
   getDeviceId(): string {
@@ -60,7 +66,19 @@ class LocalStorage {
     return content.trim() !== lastContent.trim();
   }
 
-  // 保存剪切板数据
+  // 检查缓存是否有效
+  private isCacheValid(): boolean {
+    return this.cachedItems !== null && 
+           (Date.now() - this.lastLoadTime) < this.CACHE_DURATION;
+  }
+
+  // 清除缓存
+  private clearCache(): void {
+    this.cachedItems = null;
+    this.cachedStats = null;
+  }
+
+  // 保存剪切板数据（优化版本）
   saveClipboardItems(items: ClipboardItem[]): void {
     try {
       const serializedItems = items.map(item => ({
@@ -68,39 +86,67 @@ class LocalStorage {
         timestamp: item.timestamp.toISOString()
       }));
       window.localStorage.setItem(this.CLIPBOARD_KEY, JSON.stringify(serializedItems));
+      
+      // 更新缓存
+      this.cachedItems = items;
+      this.lastLoadTime = Date.now();
     } catch (error) {
       console.error('保存剪切板数据失败:', error);
+      this.clearCache(); // 清除缓存，下次重新加载
     }
   }
 
-  // 加载剪切板数据
+  // 加载剪切板数据（优化版本，带缓存）
   loadClipboardItems(): ClipboardItem[] {
+    // 检查缓存是否有效
+    if (this.isCacheValid()) {
+      return this.cachedItems!;
+    }
+
     try {
       const data = window.localStorage.getItem(this.CLIPBOARD_KEY);
-      if (!data) return [];
+      if (!data) {
+        this.cachedItems = [];
+        this.lastLoadTime = Date.now();
+        return [];
+      }
       
       const items = JSON.parse(data);
-      return items.map((item: any) => ({
+      const parsedItems = items.map((item: any) => ({
         ...item,
         timestamp: new Date(item.timestamp)
       }));
+      
+      // 更新缓存
+      this.cachedItems = parsedItems;
+      this.lastLoadTime = Date.now();
+      
+      return parsedItems;
     } catch (error) {
       console.error('加载剪切板数据失败:', error);
+      this.clearCache();
       return [];
     }
   }
 
-  // 添加新的剪切板项目
+  // 添加新的剪切板项目（优化版本）
   addClipboardItem(content: string, tags?: string[]): ClipboardItem | null {
     const trimmedContent = content.trim();
     
     // 检查是否为新内容
     if (!this.isNewContent(trimmedContent)) {
-      console.log('内容未变化，跳过添加');
       return null;
     }
 
+    // 使用缓存的数据，避免重复加载
     const items = this.loadClipboardItems();
+    
+    // 检查是否已存在相同内容
+    const exists = items.some(item => item.content === trimmedContent);
+    if (exists) {
+      return null;
+    }
+
     const newItem: ClipboardItem = {
       id: Date.now().toString(),
       content: trimmedContent,
@@ -110,24 +156,27 @@ class LocalStorage {
       syncStatus: 'local'
     };
 
-    // 检查是否已存在相同内容
-    const exists = items.some(item => item.content === newItem.content);
-    if (exists) {
-      console.log('内容已存在，跳过添加');
-      return null;
-    }
-
     // 保存新内容为最后读取的内容
     this.setLastContent(trimmedContent);
     
+    // 添加到开头
     items.unshift(newItem);
+    
+    // 应用数据量限制
+    const settings = this.loadSettings();
+    const maxItems = settings.maxLocalItems || 1000;
+    
+    if (items.length > maxItems) {
+      // 删除最旧的记录
+      items.splice(maxItems);
+    }
+    
     this.saveClipboardItems(items);
     
-    console.log('添加新的剪切板记录');
     return newItem;
   }
 
-  // 删除剪切板项目
+  // 删除剪切板项目（优化版本）
   deleteClipboardItem(id: string): void {
     const items = this.loadClipboardItems();
     const filteredItems = items.filter(item => item.id !== id);
@@ -137,6 +186,7 @@ class LocalStorage {
   // 清空所有数据
   clearAllItems(): void {
     window.localStorage.removeItem(this.CLIPBOARD_KEY);
+    this.clearCache();
   }
 
   // 保存应用设置
@@ -185,7 +235,7 @@ class LocalStorage {
     this.saveSettings(settings);
   }
 
-  // 按条件筛选数据
+  // 按条件筛选数据（优化版本，使用缓存）
   filterItems(options: {
     month?: string; // 格式: "2024-07"
     keyword?: string;
@@ -225,12 +275,17 @@ class LocalStorage {
     });
   }
 
-  // 获取统计数据
+  // 获取统计数据（优化版本，带缓存）
   getStats(): {
     totalItems: number;
     itemsByMonth: Record<string, number>;
     itemsByDevice: Record<string, number>;
   } {
+    // 检查缓存是否有效
+    if (this.cachedStats && this.isCacheValid()) {
+      return this.cachedStats;
+    }
+
     const items = this.loadClipboardItems();
     const stats = {
       totalItems: items.length,
@@ -244,7 +299,41 @@ class LocalStorage {
       stats.itemsByDevice[item.deviceId] = (stats.itemsByDevice[item.deviceId] || 0) + 1;
     });
 
+    // 缓存统计结果
+    this.cachedStats = stats;
+    
     return stats;
+  }
+
+  // 清理过期数据（新增方法）
+  cleanupOldData(daysToKeep: number = 30): void {
+    const items = this.loadClipboardItems();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+    
+    const filteredItems = items.filter(item => item.timestamp > cutoffDate);
+    
+    if (filteredItems.length !== items.length) {
+      this.saveClipboardItems(filteredItems);
+      console.log(`清理了 ${items.length - filteredItems.length} 条过期数据`);
+    }
+  }
+
+  // 获取存储使用情况（新增方法）
+  getStorageInfo(): {
+    totalItems: number;
+    totalSize: number;
+    maxItems: number;
+  } {
+    const items = this.loadClipboardItems();
+    const settings = this.loadSettings();
+    const dataString = JSON.stringify(items);
+    
+    return {
+      totalItems: items.length,
+      totalSize: new Blob([dataString]).size,
+      maxItems: settings.maxLocalItems || 1000
+    };
   }
 }
 
