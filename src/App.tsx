@@ -121,12 +121,43 @@ function App() {
   // 导出为TXT文件
   const exportToTxt = () => {
     const itemsToExport = filteredItems.length > 0 ? filteredItems : clipboardItems;
+    
+    // 生成文件头部信息
+    const now = new Date();
+    const header = `剪切板数据导出
+导出时间: ${now.toLocaleString('zh-CN')}
+共导出 ${itemsToExport.length} 条记录
+
+${'='.repeat(80)}
+
+`;
+
+    // 格式化每条记录
     const content = itemsToExport.map((item, index) => {
       const time = item.timestamp.toLocaleString('zh-CN');
-      return `${index + 1}. [${time}] ${item.content}\n`;
-    }).join('\n');
+      const deviceInfo = item.deviceId.split('-')[0];
+      const contentType = item.content.includes('\n') ? '多行文本' : '单行文本';
+      
+      // 每条记录的格式
+      const recordContent = `${index + 1}. 记录详情
+时间: ${time}
+设备: ${deviceInfo}
+类型: ${contentType}
+字符数: ${item.content.length}
+${item.syncStatus === 'synced' ? '状态: 已同步' : '状态: 本地'}
+
+内容:
+${item.content}`;
+
+      // 添加分割线（最后一条记录不加分割线）
+      const separator = index < itemsToExport.length - 1 ? `\n\n${'-'.repeat(80)}\n\n` : '';
+      
+      return recordContent + separator;
+    }).join('');
     
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const fullContent = header + content;
+    
+    const blob = new Blob([fullContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -177,10 +208,10 @@ function App() {
         <h1>📋 剪切板监控器 {isElectron && <span className="electron-badge">桌面版</span>}</h1>
         <div className="controls">
           <button 
-            className={`control-btn ${isMonitoring ? 'monitoring' : 'start'}`}
+            className={`control-btn ${isMonitoring ? 'monitoring' : 'stopped'}`}
             onClick={isMonitoring ? stopMonitoring : startMonitoring}
           >
-            {isMonitoring ? '🟢 已开始监控' : '⚪ 开始监控'}
+            {isMonitoring ? '🟢 已开始监控' : '🔴 已停止监控'}
           </button>
           <button 
             className="control-btn test"

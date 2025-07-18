@@ -48,21 +48,41 @@ const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filtered
     // 生成导出文件名
     const now = new Date();
     const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
-    const fileName = `clipboard_data_${timestamp}.txt`;
+    const fileName = `clipboard_filtered_${timestamp}.txt`;
 
-    // 格式化数据内容
+    // 生成文件头部信息
+    const header = `剪切板筛选数据导出
+导出时间: ${now.toLocaleString('zh-CN')}
+筛选条件: ${JSON.stringify(filters, null, 2)}
+共导出 ${filteredItems.length} 条记录
+
+${'='.repeat(80)}
+
+`;
+
+    // 格式化每条记录
     const exportContent = filteredItems.map((item, index) => {
       const date = new Date(item.timestamp).toLocaleString('zh-CN');
-      const content = item.content;
+      const deviceInfo = item.deviceId.split('-')[0];
+      const contentType = item.content.includes('\n') ? '多行文本' : '单行文本';
       
-      // 用分割线分隔不同内容
-      const separator = '\n' + '='.repeat(50) + '\n';
+      // 每条记录的格式
+      const recordContent = `${index + 1}. 记录详情
+时间: ${date}
+设备: ${deviceInfo}
+类型: ${contentType}
+字符数: ${item.content.length}
+${item.syncStatus === 'synced' ? '状态: 已同步' : '状态: 本地'}
+
+内容:
+${item.content}`;
+
+      // 添加分割线（最后一条记录不加分割线）
+      const separator = index < filteredItems.length - 1 ? `\n\n${'-'.repeat(80)}\n\n` : '';
       
-      return `${index + 1}. 时间: ${date}\n内容:\n${content}${index < filteredItems.length - 1 ? separator : ''}`;
+      return recordContent + separator;
     }).join('');
 
-    // 添加文件头部信息
-    const header = `剪切板数据导出\n导出时间: ${now.toLocaleString('zh-CN')}\n筛选条件: ${JSON.stringify(filters, null, 2)}\n共导出 ${filteredItems.length} 条记录\n\n`;
     const fullContent = header + exportContent;
 
     // 创建并下载文件

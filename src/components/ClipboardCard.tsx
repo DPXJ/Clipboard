@@ -26,22 +26,48 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
   // 时间格式化
   const formattedTime = useMemo(() => {
     const now = new Date();
-    const diff = now.getTime() - item.timestamp.getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const itemTime = new Date(item.timestamp);
+    const diff = now.getTime() - itemTime.getTime();
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
     
-    if (minutes < 1) return '刚刚';
-    if (minutes < 60) return `${minutes}分钟前`;
-    if (hours < 24) return `${hours}小时前`;
-    if (days < 7) return `${days}天前`;
+    // 检查时间戳是否有效
+    if (isNaN(itemTime.getTime())) {
+      console.error('无效的时间戳:', item.timestamp);
+      return '时间无效';
+    }
     
-    return item.timestamp.toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    // 更精确的时间显示
+    if (seconds < 0) {
+      // 如果时间戳是未来时间，显示具体时间
+      return itemTime.toLocaleString('zh-CN', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } else if (seconds < 10) {
+      return '刚刚';
+    } else if (seconds < 60) {
+      return `${seconds}秒前`;
+    } else if (minutes < 60) {
+      return `${minutes}分钟前`;
+    } else if (hours < 24) {
+      return `${hours}小时前`;
+    } else if (days < 7) {
+      return `${days}天前`;
+    } else {
+      // 超过一周显示具体日期
+      return itemTime.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
   }, [item.timestamp]);
 
   // 内容截断
@@ -97,8 +123,13 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
     }
   }, [showDeleteConfirm, onDelete, item.id]);
 
+  // 切换显示完整内容
+  const toggleFullContent = useCallback(() => {
+    setShowFullContent(!showFullContent);
+  }, [showFullContent]);
+
   return (
-    <div className={`clipboard-card ${darkTheme ? 'dark-theme' : 'light-theme'}`}>
+    <div className={`clipboard-card ${darkTheme ? 'dark-theme' : 'light-theme'} ${showFullContent ? 'expanded' : ''}`}>
       <div className="card-header">
         <div className="card-time">
           <span className="time-icon">🕒</span>
@@ -131,7 +162,7 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
         {item.content.length > 150 && (
           <button 
             className="show-full-btn"
-            onClick={() => setShowFullContent(!showFullContent)}
+            onClick={toggleFullContent}
           >
             {showFullContent ? '收起内容' : `显示完整内容 (${item.content.length} 字符)`}
           </button>

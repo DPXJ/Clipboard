@@ -2,7 +2,7 @@
 .clipboard-card {
   border-radius: 16px;
   padding: 1.5rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, border-color 0.3s ease, height 0.3s ease;
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
@@ -10,10 +10,17 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   contain: layout style paint;
-  /* 固定高度和flexbox布局 */
+  /* 默认固定高度 */
   height: 280px;
   display: flex;
   flex-direction: column;
+}
+
+/* 展开状态 */
+.clipboard-card.expanded {
+  height: auto;
+  min-height: 280px;
+  max-height: 600px;
 }
 
 /* 亮色主题 */
@@ -280,6 +287,15 @@
   /* 文本区域可以滚动，占据可用空间 */
   flex: 1;
   min-height: 0; /* 重要：允许flex子元素收缩 */
+  /* 展开时的样式 */
+  transition: all 0.3s ease;
+}
+
+/* 展开状态下的内容文本 */
+.clipboard-card.expanded .content-text {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .content-text::-webkit-scrollbar {
@@ -398,6 +414,16 @@
   .clipboard-card {
     padding: 1rem;
     height: 260px; /* 移动端稍微调整高度 */
+  }
+  
+  .clipboard-card.expanded {
+    height: auto;
+    min-height: 260px;
+    max-height: 500px;
+  }
+  
+  .clipboard-card.expanded .content-text {
+    max-height: 300px;
   }
   
   .card-header {

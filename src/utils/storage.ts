@@ -112,10 +112,25 @@ class LocalStorage {
       }
       
       const items = JSON.parse(data);
-      const parsedItems = items.map((item: any) => ({
-        ...item,
-        timestamp: new Date(item.timestamp)
-      }));
+      const parsedItems = items.map((item: any) => {
+        const parsedItem = {
+          ...item,
+          timestamp: new Date(item.timestamp)
+        };
+        
+        // 调试信息（只显示前3个项目）
+        if (items.indexOf(item) < 3) {
+          console.log('解析项目:', {
+            id: parsedItem.id,
+            content: parsedItem.content.substring(0, 30) + '...',
+            originalTimestamp: item.timestamp,
+            parsedTimestamp: parsedItem.timestamp.toISOString(),
+            timestampMs: parsedItem.timestamp.getTime()
+          });
+        }
+        
+        return parsedItem;
+      });
       
       // 更新缓存
       this.cachedItems = parsedItems;
@@ -147,14 +162,23 @@ class LocalStorage {
       return null;
     }
 
+    const now = new Date();
     const newItem: ClipboardItem = {
       id: Date.now().toString(),
       content: trimmedContent,
-      timestamp: new Date(),
+      timestamp: now,
       deviceId: this.getDeviceId(),
       tags: tags || [],
       syncStatus: 'local'
     };
+
+    // 调试信息
+    console.log('创建新项目:', {
+      id: newItem.id,
+      content: newItem.content.substring(0, 50) + '...',
+      timestamp: newItem.timestamp.toISOString(),
+      timestampMs: newItem.timestamp.getTime()
+    });
 
     // 保存新内容为最后读取的内容
     this.setLastContent(trimmedContent);
