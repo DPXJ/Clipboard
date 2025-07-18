@@ -193,10 +193,9 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
           <button
             className={`card-btn copy ${copied ? 'copied' : ''}`}
             onClick={copyToClipboard}
-            title="复制到剪切板"
+            title={copied ? '已复制到剪切板' : '复制到剪切板'}
           >
             {copied ? <Check size={16} /> : <Copy size={16} />}
-            {copied ? '已复制' : '复制'}
           </button>
           <button
             className={`card-btn flomo ${flomoSyncing ? 'syncing' : ''} ${flomoSyncResult === 'success' ? 'success' : flomoSyncResult === 'error' ? 'error' : ''}`}
@@ -204,8 +203,7 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
             title={flomoSyncing ? '同步中...' : flomoSyncResult === 'success' ? '同步成功' : flomoSyncResult === 'error' ? '同步失败' : '同步到Flomo'}
             disabled={flomoSyncing}
           >
-            <FileText size={16} />
-            {flomoSyncing ? '同步中' : flomoSyncResult === 'success' ? '已同步' : flomoSyncResult === 'error' ? '失败' : 'Flomo'}
+            <span className="flomo-icon">F</span>
           </button>
           <button
             className={`card-btn delete ${showDeleteConfirm ? 'confirm' : ''}`}
@@ -213,7 +211,6 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
             title={showDeleteConfirm ? '点击确认删除' : '删除'}
           >
             <Trash2 size={16} />
-            {showDeleteConfirm ? '确认删除' : '删除'}
           </button>
         </div>
       </div>

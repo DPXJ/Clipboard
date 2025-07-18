@@ -53,37 +53,17 @@ const FlomoConfigModal: React.FC<FlomoConfigModalProps> = ({
     }
 
     setIsLoading(true);
-    setTestResult(null);
-
     try {
-      // 测试API连接
-      const testResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: '测试连接 #flomo-test'
-        })
-      });
-
-      if (testResponse.ok) {
-        // 保存配置
-        const config = {
-          apiUrl: apiUrl.trim(),
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem('flomo_config', JSON.stringify(config));
-        setTestResult('配置保存成功！测试消息已发送到flomo');
-        
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        setTestResult('API连接失败，请检查URL是否正确');
-      }
+      const config = {
+        apiUrl: apiUrl.trim()
+      };
+      localStorage.setItem('flomo_config', JSON.stringify(config));
+      setTestResult('配置保存成功！');
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (error) {
-      setTestResult('网络错误，请检查网络连接和API URL');
+      setTestResult('保存失败，请重试');
     } finally {
       setIsLoading(false);
     }
@@ -124,19 +104,28 @@ const FlomoConfigModal: React.FC<FlomoConfigModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`modal-overlay ${darkTheme ? 'dark-theme' : 'light-theme'}`} onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+    <div 
+      className={`flomo-modal-overlay ${darkTheme ? 'dark' : 'light'}`} 
+      onClick={onClose}
+    >
+      <div 
+        className="flomo-modal-content" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flomo-modal-header">
           <h2>配置 Flomo 同步</h2>
-          <button className="close-btn" onClick={onClose}>
+          <button 
+            className="flomo-close-btn" 
+            onClick={onClose}
+          >
             <X size={24} />
           </button>
         </div>
         
-        <div className="modal-body">
-          <div className="config-section">
+        <div className="flomo-modal-body">
+          <div className="flomo-config-section">
             <h3>API 配置</h3>
-            <div className="form-group">
+            <div className="flomo-form-group">
               <label htmlFor="apiUrl">Flomo API URL</label>
               <input
                 type="text"
@@ -144,7 +133,6 @@ const FlomoConfigModal: React.FC<FlomoConfigModalProps> = ({
                 value={apiUrl}
                 onChange={(e) => setApiUrl(e.target.value)}
                 placeholder="https://flomoapp.com/iwh/YOUR_TOKEN/YOUR_SECRET/"
-                disabled={isLoading}
               />
               <small>
                 请输入您的 Flomo API URL，格式如：https://flomoapp.com/iwh/YOUR_TOKEN/YOUR_SECRET/
@@ -152,7 +140,7 @@ const FlomoConfigModal: React.FC<FlomoConfigModalProps> = ({
             </div>
           </div>
 
-          <div className="help-section">
+          <div className="flomo-help-section">
             <h4>如何获取 Flomo API？</h4>
             <ol>
               <li>登录 <a href="https://flomoapp.com" target="_blank" rel="noopener noreferrer">Flomo</a></li>
@@ -164,25 +152,28 @@ const FlomoConfigModal: React.FC<FlomoConfigModalProps> = ({
           </div>
 
           {testResult && (
-            <div className={`test-result ${testResult.includes('成功') ? 'success' : 'error'}`}>
+            <div className={`flomo-test-result ${testResult.includes('成功') ? 'success' : 'error'}`}>
               {testResult}
             </div>
           )}
         </div>
 
-        <div className="modal-footer">
+        <div className="flomo-modal-footer">
           <button 
-            className="btn btn-test" 
+            className="flomo-btn flomo-btn-test"
             onClick={handleTest}
             disabled={isLoading || !apiUrl.trim()}
           >
             {isLoading ? '测试中...' : '测试连接'}
           </button>
-          <button className="btn btn-secondary" onClick={onClose}>
+          <button 
+            className="flomo-btn flomo-btn-secondary"
+            onClick={onClose}
+          >
             取消
           </button>
           <button 
-            className="btn btn-primary" 
+            className="flomo-btn flomo-btn-primary"
             onClick={handleSave}
             disabled={isLoading || !apiUrl.trim()}
           >

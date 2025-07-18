@@ -24,17 +24,20 @@ async function findDevServerPort() {
         client.on('error', () => {
           reject();
         });
-        client.setTimeout(1000, () => {
+        client.setTimeout(2000, () => {
           client.destroy();
           reject();
         });
       });
+      console.log(`找到开发服务器端口: ${port}`);
       return port;
     } catch (error) {
+      console.log(`端口 ${port} 不可用`);
       continue;
     }
   }
-  return 5173; // 默认端口
+  console.log('未找到可用的开发服务器端口');
+  return null; // 返回null表示没有找到
 }
 
 // 创建主窗口
@@ -59,19 +62,13 @@ async function createWindow() {
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   console.log('开发环境检测:', isDev, 'NODE_ENV:', process.env.NODE_ENV, 'isPackaged:', app.isPackaged);
   
+  // 暂时总是使用本地构建的文件，确保稳定性
+  console.log('加载本地构建文件');
+  await mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  
   if (isDev) {
-    try {
-      const port = await findDevServerPort();
-      const url = `http://localhost:${port}`;
-      console.log(`正在连接到开发服务器: ${url}`);
-      await mainWindow.loadURL(url);
-      mainWindow.webContents.openDevTools();
-    } catch (error) {
-      console.error('无法连接到开发服务器，尝试加载本地文件:', error);
-      mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-    }
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    // 在开发模式下打开开发者工具
+    mainWindow.webContents.openDevTools();
   }
 
   // 窗口准备好后显示
