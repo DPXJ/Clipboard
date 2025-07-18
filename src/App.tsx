@@ -31,10 +31,16 @@ interface ClipboardItem {
 
 function App() {
   const [isElectron, setIsElectron] = useState(false);
-  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [isMonitoring, setIsMonitoring] = useState(true); // 默认开启监控
   const [clipboardItems, setClipboardItems] = useState<ClipboardItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<ClipboardItem[]>([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [darkTheme, setDarkTheme] = useState(false); // 默认亮色主题
+
+  // 切换主题
+  const toggleTheme = () => {
+    setDarkTheme(!darkTheme);
+  };
 
   // 检查是否在Electron环境中并加载数据
   useEffect(() => {
@@ -44,6 +50,7 @@ function App() {
 
     // 加载本地存储的数据
     const savedItems = localStorage.loadClipboardItems();
+    console.log('加载的历史数据:', savedItems.length, '条');
     setClipboardItems(savedItems);
     setFilteredItems(savedItems);
 
@@ -77,9 +84,9 @@ function App() {
         setFilteredItems([]);
       });
 
-      // 获取初始监控状态
+      // 获取当前监控状态
       window.electronAPI.getMonitoringStatus().then(status => {
-        console.log('初始监控状态:', status);
+        console.log('获取到的监控状态:', status);
         setIsMonitoring(status);
       });
     }
@@ -165,15 +172,15 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className={`app ${darkTheme ? 'dark-theme' : 'light-theme'}`}>
       <header className="app-header">
         <h1>📋 剪切板监控器 {isElectron && <span className="electron-badge">桌面版</span>}</h1>
         <div className="controls">
           <button 
-            className={`control-btn ${isMonitoring ? 'stop' : 'start'}`}
+            className={`control-btn ${isMonitoring ? 'monitoring' : 'start'}`}
             onClick={isMonitoring ? stopMonitoring : startMonitoring}
           >
-            {isMonitoring ? '⏹️ 停止监控' : '▶️ 开始监控'}
+            {isMonitoring ? '🟢 已开始监控' : '⚪ 开始监控'}
           </button>
           <button 
             className="control-btn test"
@@ -205,10 +212,16 @@ function App() {
           >
             📄 导出TXT
           </button>
+          <button 
+            className="control-btn theme"
+            onClick={toggleTheme}
+          >
+            {darkTheme ? '☀️ 亮色主题' : '🌙 暗色主题'}
+          </button>
         </div>
         {isElectron && (
           <div className="electron-info">
-            <p>🔧 监控状态: {isMonitoring ? '开启' : '关闭'}</p>
+            <p>🔧 监控状态: {isMonitoring ? '已开启监控' : '已关闭监控'}</p>
             <p>💾 记录数量: {clipboardItems.length}</p>
           </div>
         )}
@@ -219,6 +232,7 @@ function App() {
           onFilterChange={applyFilter}
           stats={localStorage.getStats()}
           filteredItems={filteredItems}
+          darkTheme={darkTheme}
         />
       )}
 
@@ -227,10 +241,10 @@ function App() {
           <div className="empty-state">
             <div className="empty-icon">📋</div>
             <h3>暂无剪切板记录</h3>
-            <p>点击"开始监控"按钮开始记录剪切板内容</p>
+            <p>监控已开启，复制任何内容都会自动记录</p>
             {isElectron && (
               <p className="debug-info">
-                调试信息: Electron环境已检测到，监控状态: {isMonitoring ? '开启' : '关闭'}
+                调试信息: Electron环境已检测到，监控状态: {isMonitoring ? '已开启' : '已关闭'}
               </p>
             )}
           </div>
@@ -246,18 +260,14 @@ function App() {
                   setFilteredItems(prev => prev.filter(item => item.id !== id));
                 }}
                 isElectron={isElectron}
+                darkTheme={darkTheme}
               />
             ))}
           </div>
         )}
       </main>
 
-      {isMonitoring && (
-        <div className="monitoring-indicator">
-          <div className="pulse"></div>
-          <span>正在监控剪切板...</span>
-        </div>
-      )}
+
     </div>
   );
 }

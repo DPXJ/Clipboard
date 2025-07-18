@@ -1,18 +1,241 @@
+/* 基础样式 */
 .data-filter {
-  background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
+/* 亮色主题 */
+.data-filter.light-theme {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #333333;
+}
+
+.data-filter.light-theme .filter-header {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.data-filter.light-theme .export-btn {
+  background: rgba(76, 175, 80, 0.8);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #ffffff;
+}
+
+.data-filter.light-theme .export-btn:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.9);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.data-filter.light-theme .export-btn:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.data-filter.light-theme .filter-group label {
+  color: white;
+}
+
+.data-filter.light-theme .filter-input,
+.data-filter.light-theme .filter-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.data-filter.light-theme .filter-input:focus,
+.data-filter.light-theme .filter-select:focus {
+  border-color: rgba(76, 175, 80, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.data-filter.light-theme .filter-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.data-filter.light-theme .filter-select option {
+  background: #667eea;
+  color: #ffffff;
+}
+
+.data-filter.light-theme .filter-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.data-filter.light-theme .filter-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.data-filter.light-theme .filter-btn.apply {
+  background: rgba(76, 175, 80, 0.8);
+  border-color: rgba(76, 175, 80, 0.3);
+  color: white;
+}
+
+.data-filter.light-theme .filter-btn.apply:hover {
+  background: rgba(76, 175, 80, 0.9);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.data-filter.light-theme .filter-btn.reset {
+  background: rgba(244, 67, 54, 0.8);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: white;
+}
+
+.data-filter.light-theme .filter-btn.reset:hover {
+  background: rgba(244, 67, 54, 0.9);
+  border-color: rgba(244, 67, 54, 0.5);
+}
+
+.data-filter.light-theme .filter-stats {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-filter.light-theme .filter-stats h4 {
+  color: white;
+}
+
+.data-filter.light-theme .stat-item {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.data-filter.light-theme .stat-value {
+  color: #4caf50;
+}
+
+.data-filter.light-theme .stat-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 暗色主题 */
+.data-filter.dark-theme {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.data-filter.dark-theme .filter-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-filter.dark-theme .export-btn {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.data-filter.dark-theme .export-btn:hover:not(:disabled) {
+  background: #3a3a3a;
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.data-filter.dark-theme .export-btn:disabled {
+  background: #1a1a1a;
+  color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.data-filter.dark-theme .filter-group label {
+  color: #cccccc;
+}
+
+.data-filter.dark-theme .filter-input,
+.data-filter.dark-theme .filter-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.data-filter.dark-theme .filter-input:focus,
+.data-filter.dark-theme .filter-select:focus {
+  border-color: rgba(76, 175, 80, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.data-filter.dark-theme .filter-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.data-filter.dark-theme .filter-select option {
+  background: #2a2a2a;
+  color: #ffffff;
+}
+
+.data-filter.dark-theme .filter-btn {
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-filter.dark-theme .filter-btn:hover {
+  background: #3a3a3a;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.data-filter.dark-theme .filter-btn.apply {
+  background: #1e3a1e;
+  border-color: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.data-filter.dark-theme .filter-btn.apply:hover {
+  background: #2e4a2e;
+  border-color: rgba(76, 175, 80, 0.5);
+  color: #66bb6a;
+}
+
+.data-filter.dark-theme .filter-btn.reset {
+  background: #3a1e1e;
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+.data-filter.dark-theme .filter-btn.reset:hover {
+  background: #4a2e2e;
+  border-color: rgba(244, 67, 54, 0.5);
+  color: #ef5350;
+}
+
+.data-filter.dark-theme .filter-stats {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.data-filter.dark-theme .filter-stats h4 {
+  color: #ffffff;
+}
+
+.data-filter.dark-theme .stat-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-filter.dark-theme .stat-value {
+  color: #4caf50;
+}
+
+.data-filter.dark-theme .stat-label {
+  color: #cccccc;
+}
+
+/* 共用样式 */
 .filter-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .filter-actions-header {
@@ -22,9 +245,6 @@
 }
 
 .export-btn {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  border: none;
-  color: #ffffff;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
@@ -37,51 +257,14 @@
 }
 
 .export-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #45a049, #3d8b40);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .export-btn:disabled {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-}
-
-.filter-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #ffffff;
-  font-weight: 500;
-}
-
-.active-indicator {
-  color: #4CAF50;
-  font-size: 1.2rem;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.expand-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.expand-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
 }
 
 .filter-content {
@@ -89,88 +272,120 @@
 }
 
 .filter-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
 }
 
 .filter-group label {
-  color: #ffffff;
-  margin-bottom: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.filter-group input,
-.filter-group select {
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
+.filter-input,
+.filter-select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
   font-size: 0.9rem;
-  transition: border-color 0.3s ease;
+  transition: all 0.2s ease;
 }
 
-.filter-group input:focus,
-.filter-group select:focus {
+.filter-input:focus,
+.filter-select:focus {
   outline: none;
-  border-color: #4A90E2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-}
-
-.filter-group select option {
-  background: #1a1a2e;
-  color: #ffffff;
 }
 
 .filter-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
   margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.clear-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+.filter-btn {
   padding: 0.5rem 1rem;
+  border: none;
   border-radius: 6px;
-  cursor: pointer;
   font-size: 0.9rem;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.clear-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+.filter-btn:hover {
+  transform: translateY(-1px);
 }
 
 .filter-stats {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
 }
 
+.filter-stats h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
   .filter-row {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .filter-group {
+    min-width: 100%;
   }
   
   .filter-actions {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
+    justify-content: center;
+    flex-wrap: wrap;
   }
   
-  .clear-btn {
-    width: 100%;
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .stat-item {
+    padding: 0.5rem;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
   }
 } 

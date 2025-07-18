@@ -13,6 +13,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       }
       callback(isMonitoring);
     });
+    
+    // 同时监听monitoring-status-changed事件
+    ipcRenderer.on('monitoring-status-changed', (event, isMonitoring) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('收到monitoring-status-changed消息:', isMonitoring);
+      }
+      callback(isMonitoring);
+    });
   },
   
   onClearRecords: (callback) => {

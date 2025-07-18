@@ -128,6 +128,13 @@ function createTray() {
     },
     { type: 'separator' },
     {
+      label: '重启应用',
+      click: () => {
+        app.relaunch();
+        app.exit();
+      }
+    },
+    {
       label: '退出',
       click: () => {
         app.isQuiting = true;
@@ -274,6 +281,13 @@ function updateTrayMenu() {
       },
       { type: 'separator' },
       {
+        label: '重启应用',
+        click: () => {
+          app.relaunch();
+          app.exit();
+        }
+      },
+      {
         label: '退出',
         click: () => {
           app.isQuiting = true;
@@ -291,6 +305,11 @@ app.whenReady().then(async () => {
   await createWindow();
   createTray();
   registerGlobalShortcuts();
+  
+  // 默认开启监控
+  isMonitoring = true;
+  startMonitoring();
+  updateTrayMenu();
   
   // 在 macOS 上，当所有窗口都关闭时，重新创建一个窗口
   app.on('activate', () => {
@@ -342,6 +361,12 @@ ipcMain.handle('set-monitoring-status', (event, status) => {
     stopMonitoring();
   }
   updateTrayMenu();
+  
+  // 向渲染进程发送状态更新
+  if (mainWindow) {
+    mainWindow.webContents.send('monitoring-status-changed', isMonitoring);
+  }
+  
   return true;
 });
 

@@ -9,6 +9,7 @@ interface DataFilterProps {
     itemsByDevice: Record<string, number>;
   };
   filteredItems: any[]; // 添加筛选后的数据
+  darkTheme?: boolean;
 }
 
 export interface FilterOptions {
@@ -18,7 +19,7 @@ export interface FilterOptions {
   tags?: string[];
 }
 
-const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filteredItems }) => {
+const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filteredItems, darkTheme = false }) => {
   const [filters, setFilters] = useState<FilterOptions>({});
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -99,7 +100,7 @@ const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filtered
   );
 
   return (
-    <div className="data-filter">
+    <div className={`data-filter ${darkTheme ? 'dark-theme' : 'light-theme'}`}>
       <div className="filter-header">
         <div className="filter-title">
           <span>🔍 数据筛选</span>
