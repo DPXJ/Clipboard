@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ClipboardCard from './components/ClipboardCard';
+import DataFilter from './components/DataFilter';
+import { localStorage } from './utils/storage';
 import './App.css';
 
 // 声明全局Electron API类型
@@ -31,35 +33,33 @@ function App() {
   const [isElectron, setIsElectron] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [clipboardItems, setClipboardItems] = useState<ClipboardItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<ClipboardItem[]>([]);
+  const [showFilter, setShowFilter] = useState(false);
 
-  // 检查是否在Electron环境中
+  // 检查是否在Electron环境中并加载数据
   useEffect(() => {
     const electronDetected = !!window.electronAPI;
     setIsElectron(electronDetected);
     console.log('Electron环境检测:', electronDetected);
+
+    // 加载本地存储的数据
+    const savedItems = localStorage.loadClipboardItems();
+    setClipboardItems(savedItems);
+    setFilteredItems(savedItems);
 
     if (electronDetected && window.electronAPI) {
       // 监听剪切板变化
       window.electronAPI.onClipboardChanged((content) => {
         console.log('前端收到剪切板内容变化:', content);
         if (content && content.trim()) {
-          const newItem: ClipboardItem = {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            content: content.trim(),
-            timestamp: new Date(),
-            deviceId: 'desktop-main',
-            syncStatus: 'local'
-          };
-          setClipboardItems(prev => {
-            // 检查是否已经存在相同内容的记录
-            const exists = prev.some(item => item.content === content.trim());
-            if (exists) {
-              console.log('内容已存在，跳过添加');
-              return prev;
-            }
-            console.log('添加新的剪切板记录');
-            return [newItem, ...prev.slice(0, 9)];
-          });
+          const newItem = localStorage.addClipboardItem(content.trim());
+          if (newItem) {
+            setClipboardItems(prev => {
+              const updated = [newItem, ...prev];
+              setFilteredItems(updated);
+              return updated;
+            });
+          }
         }
       });
 
@@ -72,7 +72,9 @@ function App() {
       // 监听清空记录
       window.electronAPI.onClearRecords(() => {
         console.log('清空记录');
+        localStorage.clearAllItems();
         setClipboardItems([]);
+        setFilteredItems([]);
       });
 
       // 获取初始监控状态
@@ -95,18 +97,51 @@ function App() {
       }
       
       if (text && text.trim()) {
-        const newItem: ClipboardItem = {
-          id: Date.now().toString(),
-          content: text.trim(),
-          timestamp: new Date(),
-          deviceId: 'desktop-main',
-          syncStatus: 'local'
-        };
-        setClipboardItems(prev => [newItem, ...prev.slice(0, 9)]);
+        const newItem = localStorage.addClipboardItem(text.trim());
+        if (newItem) {
+          setClipboardItems(prev => {
+            const updated = [newItem, ...prev];
+            setFilteredItems(updated);
+            return updated;
+          });
+        }
       }
     } catch (error) {
       console.error('读取剪切板失败:', error);
     }
+  };
+
+  // 导出为TXT文件
+  const exportToTxt = () => {
+    const itemsToExport = filteredItems.length > 0 ? filteredItems : clipboardItems;
+    const content = itemsToExport.map((item, index) => {
+      const time = item.timestamp.toLocaleString('zh-CN');
+      return `${index + 1}. [${time}] ${item.content}\n`;
+    }).join('\n');
+    
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `剪切板记录_${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // 应用筛选
+  const applyFilter = (options: {
+    month?: string;
+    keyword?: string;
+    deviceId?: string;
+    tags?: string[];
+  }) => {
+    const filtered = localStorage.filterItems(options);
+    setFilteredItems(filtered);
+  };
+
+  // 重置筛选
+  const resetFilter = () => {
+    setFilteredItems(clipboardItems);
   };
 
   // 开始监控
@@ -148,10 +183,27 @@ function App() {
           </button>
           <button 
             className="control-btn clear"
-            onClick={() => setClipboardItems([])}
+            onClick={() => {
+              localStorage.clearAllItems();
+              setClipboardItems([]);
+              setFilteredItems([]);
+            }}
             disabled={clipboardItems.length === 0}
           >
             🗑️ 清空记录
+          </button>
+          <button 
+            className="control-btn filter"
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            🔍 筛选数据
+          </button>
+          <button 
+            className="control-btn export"
+            onClick={exportToTxt}
+            disabled={clipboardItems.length === 0}
+          >
+            📄 导出TXT
           </button>
         </div>
         {isElectron && (
@@ -162,8 +214,16 @@ function App() {
         )}
       </header>
 
+      {showFilter && (
+        <DataFilter
+          onFilterChange={applyFilter}
+          stats={localStorage.getStats()}
+          filteredItems={filteredItems}
+        />
+      )}
+
       <main className="app-main">
-        {clipboardItems.length === 0 ? (
+        {(filteredItems.length > 0 ? filteredItems : clipboardItems).length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📋</div>
             <h3>暂无剪切板记录</h3>
@@ -176,12 +236,14 @@ function App() {
           </div>
         ) : (
           <div className="clipboard-grid">
-            {clipboardItems.map((item) => (
+            {(filteredItems.length > 0 ? filteredItems : clipboardItems).map((item) => (
               <ClipboardCard
                 key={item.id}
                 item={item}
                 onDelete={(id) => {
+                  localStorage.deleteClipboardItem(id);
                   setClipboardItems(prev => prev.filter(item => item.id !== id));
+                  setFilteredItems(prev => prev.filter(item => item.id !== id));
                 }}
                 isElectron={isElectron}
               />

@@ -126,6 +126,24 @@
   background: rgba(255, 193, 7, 0.9);
 }
 
+.control-btn.filter {
+  background: rgba(3, 169, 244, 0.8);
+  border-color: rgba(3, 169, 244, 0.3);
+}
+
+.control-btn.filter:hover {
+  background: rgba(3, 169, 244, 0.9);
+}
+
+.control-btn.export {
+  background: rgba(76, 175, 80, 0.8);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.control-btn.export:hover {
+  background: rgba(76, 175, 80, 0.9);
+}
+
 .electron-info {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
