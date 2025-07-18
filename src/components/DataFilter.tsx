@@ -10,6 +10,8 @@ interface DataFilterProps {
   };
   filteredItems: any[]; // 添加筛选后的数据
   darkTheme?: boolean;
+  isVisible?: boolean;
+  onToggleVisibility?: () => void;
 }
 
 export interface FilterOptions {
@@ -19,7 +21,7 @@ export interface FilterOptions {
   tags?: string[];
 }
 
-const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filteredItems, darkTheme = false }) => {
+const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filteredItems, darkTheme = false, isVisible = true, onToggleVisibility }) => {
   const [filters, setFilters] = useState<FilterOptions>({});
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -119,6 +121,21 @@ ${item.content}`;
     value !== undefined && value !== '' && (Array.isArray(value) ? value.length > 0 : true)
   );
 
+  // 如果不可见，显示一个最小化的展开按钮
+  if (!isVisible) {
+    return (
+      <div className={`data-filter-minimized ${darkTheme ? 'dark-theme' : 'light-theme'}`}>
+        <button 
+          className="expand-filter-btn"
+          onClick={onToggleVisibility}
+          title="展开筛选面板"
+        >
+          🔍 展开筛选 {hasActiveFilters && <span className="active-indicator">●</span>}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className={`data-filter ${darkTheme ? 'dark-theme' : 'light-theme'}`}>
       <div className="filter-header">
@@ -140,6 +157,13 @@ ${item.content}`;
             onClick={() => setIsExpanded(!isExpanded)}
           >
             {isExpanded ? '收起' : '展开'}
+          </button>
+          <button 
+            className="close-filter-btn"
+            onClick={onToggleVisibility}
+            title="隐藏筛选面板"
+          >
+            ✕
           </button>
         </div>
       </div>

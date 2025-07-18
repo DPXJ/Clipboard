@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Copy, Trash2, Check, Tag, Monitor, Cloud } from 'lucide-react';
+import { Copy, Trash2, Check, Tag, Monitor, Cloud, FileText } from 'lucide-react';
 import './ClipboardCard.css';
 
 interface ClipboardItem {
@@ -22,6 +22,8 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
+  const [flomoSyncing, setFlomoSyncing] = useState(false);
+  const [flomoSyncResult, setFlomoSyncResult] = useState<'success' | 'error' | null>(null);
 
   // 时间格式化
   const formattedTime = useMemo(() => {
@@ -128,6 +130,58 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
     setShowFullContent(!showFullContent);
   }, [showFullContent]);
 
+  // 同步到Flomo
+  const syncToFlomo = useCallback(async () => {
+    // 检查是否已配置Flomo API
+    const savedConfig = localStorage.getItem('flomo_config');
+    if (!savedConfig) {
+      alert('请先配置Flomo API。点击VIP按钮 -> 同步Flomo进行配置。');
+      return;
+    }
+
+    let config;
+    try {
+      config = JSON.parse(savedConfig);
+    } catch (error) {
+      alert('Flomo配置解析失败，请重新配置。');
+      return;
+    }
+
+    if (!config.apiUrl) {
+      alert('Flomo API URL未配置，请重新配置。');
+      return;
+    }
+
+    setFlomoSyncing(true);
+    setFlomoSyncResult(null);
+
+    try {
+      const response = await fetch(config.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: `${item.content} #clipboard-sync`
+        })
+      });
+
+      if (response.ok) {
+        setFlomoSyncResult('success');
+        setTimeout(() => setFlomoSyncResult(null), 3000);
+      } else {
+        setFlomoSyncResult('error');
+        setTimeout(() => setFlomoSyncResult(null), 3000);
+      }
+    } catch (error) {
+      console.error('Flomo同步失败:', error);
+      setFlomoSyncResult('error');
+      setTimeout(() => setFlomoSyncResult(null), 3000);
+    } finally {
+      setFlomoSyncing(false);
+    }
+  }, [item.content]);
+
   return (
     <div className={`clipboard-card ${darkTheme ? 'dark-theme' : 'light-theme'} ${showFullContent ? 'expanded' : ''}`}>
       <div className="card-header">
@@ -143,6 +197,15 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
           >
             {copied ? <Check size={16} /> : <Copy size={16} />}
             {copied ? '已复制' : '复制'}
+          </button>
+          <button
+            className={`card-btn flomo ${flomoSyncing ? 'syncing' : ''} ${flomoSyncResult === 'success' ? 'success' : flomoSyncResult === 'error' ? 'error' : ''}`}
+            onClick={syncToFlomo}
+            title={flomoSyncing ? '同步中...' : flomoSyncResult === 'success' ? '同步成功' : flomoSyncResult === 'error' ? '同步失败' : '同步到Flomo'}
+            disabled={flomoSyncing}
+          >
+            <FileText size={16} />
+            {flomoSyncing ? '同步中' : flomoSyncResult === 'success' ? '已同步' : flomoSyncResult === 'error' ? '失败' : 'Flomo'}
           </button>
           <button
             className={`card-btn delete ${showDeleteConfirm ? 'confirm' : ''}`}

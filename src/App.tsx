@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ClipboardCard from './components/ClipboardCard';
 import DataFilter from './components/DataFilter';
+import FlomoConfigModal from './components/FlomoConfigModal';
 import { localStorage } from './utils/storage';
 import './App.css';
 
@@ -36,6 +37,8 @@ function App() {
   const [filteredItems, setFilteredItems] = useState<ClipboardItem[]>([]);
   const [showFilter, setShowFilter] = useState(false);
   const [darkTheme, setDarkTheme] = useState(false); // 默认亮色主题
+  const [showVipDropdown, setShowVipDropdown] = useState(false);
+  const [showFlomoConfig, setShowFlomoConfig] = useState(false);
 
   // 切换主题
   const toggleTheme = () => {
@@ -230,12 +233,7 @@ ${item.content}`;
           >
             🗑️ 清空记录
           </button>
-          <button 
-            className="control-btn filter"
-            onClick={() => setShowFilter(!showFilter)}
-          >
-            🔍 筛选数据
-          </button>
+
           <button 
             className="control-btn export"
             onClick={exportToTxt}
@@ -243,6 +241,41 @@ ${item.content}`;
           >
             📄 导出TXT
           </button>
+          <div className="vip-dropdown-container">
+            <button 
+              className="control-btn vip"
+              onClick={() => setShowVipDropdown(!showVipDropdown)}
+              onMouseEnter={() => setShowVipDropdown(true)}
+            >
+              👑 VIP
+            </button>
+            {showVipDropdown && (
+              <div 
+                className="vip-dropdown"
+                onMouseLeave={() => setShowVipDropdown(false)}
+              >
+                <button 
+                  className="dropdown-item"
+                  onClick={() => {
+                    setShowFlomoConfig(true);
+                    setShowVipDropdown(false);
+                  }}
+                >
+                  📝 同步 Flomo
+                </button>
+                <button 
+                  className="dropdown-item"
+                  onClick={() => {
+                    // TODO: 实现飞书多维表格同步
+                    alert('飞书多维表格同步功能即将上线');
+                    setShowVipDropdown(false);
+                  }}
+                >
+                  📊 同步飞书多维表格
+                </button>
+              </div>
+            )}
+          </div>
           <button 
             className="control-btn theme"
             onClick={toggleTheme}
@@ -258,14 +291,14 @@ ${item.content}`;
         )}
       </header>
 
-      {showFilter && (
-        <DataFilter
-          onFilterChange={applyFilter}
-          stats={localStorage.getStats()}
-          filteredItems={filteredItems}
-          darkTheme={darkTheme}
-        />
-      )}
+      <DataFilter
+        onFilterChange={applyFilter}
+        stats={localStorage.getStats()}
+        filteredItems={filteredItems}
+        darkTheme={darkTheme}
+        isVisible={showFilter}
+        onToggleVisibility={() => setShowFilter(!showFilter)}
+      />
 
       <main className="app-main">
         {(filteredItems.length > 0 ? filteredItems : clipboardItems).length === 0 ? (
@@ -298,7 +331,12 @@ ${item.content}`;
         )}
       </main>
 
-
+      {/* Flomo配置模态框 */}
+      <FlomoConfigModal
+        isOpen={showFlomoConfig}
+        onClose={() => setShowFlomoConfig(false)}
+        darkTheme={darkTheme}
+      />
     </div>
   );
 }

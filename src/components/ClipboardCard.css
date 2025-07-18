@@ -110,6 +110,35 @@
   border-color: rgba(244, 67, 54, 0.3);
 }
 
+.clipboard-card.light-theme .card-btn.flomo {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+  border-color: rgba(255, 152, 0, 0.2);
+}
+
+.clipboard-card.light-theme .card-btn.flomo:hover {
+  background: rgba(255, 152, 0, 0.2);
+  border-color: rgba(255, 152, 0, 0.3);
+}
+
+.clipboard-card.light-theme .card-btn.flomo.syncing {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+  border-color: rgba(33, 150, 243, 0.2);
+}
+
+.clipboard-card.light-theme .card-btn.flomo.success {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border-color: rgba(76, 175, 80, 0.2);
+}
+
+.clipboard-card.light-theme .card-btn.flomo.error {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
 .clipboard-card.light-theme .show-full-btn {
   background: rgba(103, 58, 183, 0.1);
   color: #673ab7;
@@ -222,6 +251,36 @@
   background: #4a2e2e;
   border-color: rgba(244, 67, 54, 0.5);
   color: #ef5350;
+}
+
+.clipboard-card.dark-theme .card-btn.flomo {
+  background: #3a2a1e;
+  border-color: rgba(255, 152, 0, 0.3);
+  color: #ff9800;
+}
+
+.clipboard-card.dark-theme .card-btn.flomo:hover {
+  background: #4a3a2e;
+  border-color: rgba(255, 152, 0, 0.5);
+  color: #ffb74d;
+}
+
+.clipboard-card.dark-theme .card-btn.flomo.syncing {
+  background: #1e2a3a;
+  border-color: rgba(33, 150, 243, 0.3);
+  color: #2196f3;
+}
+
+.clipboard-card.dark-theme .card-btn.flomo.success {
+  background: #1e3a1e;
+  border-color: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.clipboard-card.dark-theme .card-btn.flomo.error {
+  background: #3a1e1e;
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
 }
 
 .clipboard-card.dark-theme .show-full-btn {
