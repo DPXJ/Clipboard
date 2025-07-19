@@ -168,6 +168,23 @@
   background: rgba(244, 67, 54, 0.1);
 }
 
+.clipboard-card.light-theme .card-btn.flomo.synced {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+  border-color: rgba(158, 158, 158, 0.2);
+  cursor: default;
+}
+
+.clipboard-card.light-theme .card-btn.flomo.synced:hover {
+  background: rgba(158, 158, 158, 0.1);
+  transform: none;
+}
+
+.clipboard-card.light-theme .card-btn.flomo.synced .flomo-icon {
+  color: #9e9e9e;
+  background: rgba(158, 158, 158, 0.1);
+}
+
 .clipboard-card.light-theme .show-full-btn {
   background: rgba(103, 58, 183, 0.1);
   color: #673ab7;
@@ -339,6 +356,23 @@
 .clipboard-card.dark-theme .card-btn.flomo.error .flomo-icon {
   color: #f44336;
   background: rgba(244, 67, 54, 0.15);
+}
+
+.clipboard-card.dark-theme .card-btn.flomo.synced {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+  border-color: rgba(158, 158, 158, 0.2);
+  cursor: default;
+}
+
+.clipboard-card.dark-theme .card-btn.flomo.synced:hover {
+  background: rgba(158, 158, 158, 0.1);
+  transform: none;
+}
+
+.clipboard-card.dark-theme .card-btn.flomo.synced .flomo-icon {
+  color: #9e9e9e;
+  background: rgba(158, 158, 158, 0.15);
 }
 
 .clipboard-card.dark-theme .show-full-btn {

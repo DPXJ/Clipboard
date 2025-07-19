@@ -16,13 +16,18 @@ interface DataFilterProps {
 
 export interface FilterOptions {
   month?: string;
+  timeRange?: string;
+  startDate?: string;
+  endDate?: string;
   keyword?: string;
   deviceId?: string;
   tags?: string[];
 }
 
 const DataFilter: React.FC<DataFilterProps> = ({ onFilterChange, stats, filteredItems, darkTheme = false, isVisible = true, onToggleVisibility }) => {
-  const [filters, setFilters] = useState<FilterOptions>({});
+  const [filters, setFilters] = useState<FilterOptions>({
+    // 移除默认的今天筛选，避免与搜索功能冲突
+  });
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
@@ -121,19 +126,9 @@ ${item.content}`;
     value !== undefined && value !== '' && (Array.isArray(value) ? value.length > 0 : true)
   );
 
-  // 如果不可见，显示一个最小化的展开按钮
+  // 如果不可见，不显示任何内容（隐藏悬浮按钮）
   if (!isVisible) {
-    return (
-      <div className={`data-filter-minimized ${darkTheme ? 'dark-theme' : 'light-theme'}`}>
-        <button 
-          className="expand-filter-btn"
-          onClick={onToggleVisibility}
-          title="展开筛选面板"
-        >
-          🔍 展开筛选 {hasActiveFilters && <span className="active-indicator">●</span>}
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -172,17 +167,16 @@ ${item.content}`;
         <div className="filter-content">
           <div className="filter-row">
             <div className="filter-group">
-              <label>按月份筛选</label>
+              <label>时间范围</label>
               <select
-                value={filters.month || ''}
-                onChange={(e) => handleFilterChange('month', e.target.value || undefined)}
+                value={filters.timeRange || ''}
+                onChange={(e) => handleFilterChange('timeRange', e.target.value || undefined)}
               >
-                <option value="">全部月份</option>
-                {getMonthOptions().map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+                <option value="">全部时间</option>
+                <option value="today">今天</option>
+                <option value="week">最近一周</option>
+                <option value="month">最近一月</option>
+                <option value="custom">自定义时间段</option>
               </select>
             </div>
 
@@ -202,15 +196,55 @@ ${item.content}`;
             </div>
           </div>
 
+          {/* 自定义时间范围 */}
+          {filters.timeRange === 'custom' && (
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>开始日期</label>
+                <input
+                  type="date"
+                  value={filters.startDate || ''}
+                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                />
+              </div>
+              <div className="filter-group">
+                <label>结束日期</label>
+                <input
+                  type="date"
+                  value={filters.endDate || ''}
+                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="filter-row">
             <div className="filter-group">
-              <label>关键词搜索</label>
+              <label>内容搜索</label>
               <input
                 type="text"
                 placeholder="输入关键词搜索内容..."
                 value={filters.keyword || ''}
                 onChange={(e) => handleFilterChange('keyword', e.target.value)}
               />
+            </div>
+          </div>
+
+          {/* 保留月份筛选作为备用选项 */}
+          <div className="filter-row">
+            <div className="filter-group">
+              <label>按月份筛选（旧版本兼容）</label>
+              <select
+                value={filters.month || ''}
+                onChange={(e) => handleFilterChange('month', e.target.value || undefined)}
+              >
+                <option value="">全部月份</option>
+                {getMonthOptions().map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

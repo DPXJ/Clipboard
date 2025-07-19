@@ -98,6 +98,123 @@
 }
 
 .app.light-theme .control-btn.filter {
+  background: rgba(33, 150, 243, 0.8);
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.app.light-theme .control-btn.filter:hover {
+  background: rgba(33, 150, 243, 0.9);
+}
+
+/* 搜索容器样式 */
+.search-container {
+  position: relative;
+  display: inline-block;
+}
+
+.control-btn.search {
+  background: rgba(76, 175, 80, 0.8);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: white;
+  font-size: 16px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.control-btn.search:hover {
+  background: rgba(76, 175, 80, 0.9);
+  border-color: rgba(76, 175, 80, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.search-box {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  margin-top: 8px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: white !important;
+  color: #333 !important;
+}
+
+.search-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.search-btn-clear,
+.search-btn-primary {
+  flex: 1;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.search-btn-clear {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.search-btn-clear:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.search-btn-primary {
+  background: #4A90E2;
+  color: white;
+}
+
+.search-btn-primary:hover {
+  background: #357ABD;
+}
+
+/* 暗色主题下的搜索样式 */
+.app.dark-theme .search-box {
+  background: rgba(26, 26, 46, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.app.dark-theme .search-box input {
+  background: white !important;
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #333 !important;
+}
+
+.app.dark-theme .search-btn-clear {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.app.dark-theme .search-btn-clear:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.app.light-theme .control-btn.filter {
   background: rgba(3, 169, 244, 0.8);
   border-color: rgba(3, 169, 244, 0.3);
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ClipboardCard from './components/ClipboardCard';
 import DataFilter from './components/DataFilter';
 import FlomoConfigModal from './components/FlomoConfigModal';
@@ -35,10 +35,13 @@ function App() {
   const [isMonitoring, setIsMonitoring] = useState(true); // 默认开启监控
   const [clipboardItems, setClipboardItems] = useState<ClipboardItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<ClipboardItem[]>([]);
-  const [showFilter, setShowFilter] = useState(false);
+  const [showFilter, setShowFilter] = useState(true); // 默认显示筛选
   const [darkTheme, setDarkTheme] = useState(false); // 默认亮色主题
   const [showVipDropdown, setShowVipDropdown] = useState(false);
   const [showFlomoConfig, setShowFlomoConfig] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const [isSearchMode, setIsSearchMode] = useState(false);
 
   // 切换主题
   const toggleTheme = () => {
@@ -169,14 +172,106 @@ ${item.content}`;
     URL.revokeObjectURL(url);
   };
 
-  // 应用筛选
+  // 全局搜索功能
+  const performGlobalSearch = useCallback((keyword: string) => {
+    console.log('执行搜索，关键词:', keyword);
+    console.log('总数据量:', clipboardItems.length);
+    
+    if (!keyword.trim()) {
+      console.log('关键词为空，清除筛选结果');
+      setFilteredItems([]);
+      setIsSearchMode(false);
+      return;
+    }
+
+    setIsSearchMode(true);
+    const searchLower = keyword.toLowerCase();
+    const searchResults = clipboardItems.filter(item =>
+      item.content.toLowerCase().includes(searchLower)
+    );
+
+    console.log('搜索结果数量:', searchResults.length);
+    setFilteredItems(searchResults);
+  }, [clipboardItems]);
+
+  // 应用筛选 - 增强版
   const applyFilter = (options: {
     month?: string;
+    timeRange?: string;
+    startDate?: string;
+    endDate?: string;
     keyword?: string;
     deviceId?: string;
     tags?: string[];
   }) => {
-    const filtered = localStorage.filterItems(options);
+    // 如果当前在搜索模式，不执行筛选
+    if (isSearchMode) {
+      console.log('搜索模式激活，跳过筛选操作');
+      return;
+    }
+    
+    let filtered = [...clipboardItems];
+
+    // 时间范围筛选
+    if (options.timeRange) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      switch (options.timeRange) {
+        case 'today':
+          filtered = filtered.filter(item => {
+            const itemDate = new Date(item.timestamp);
+            return itemDate >= today;
+          });
+          break;
+        case 'week':
+          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+          filtered = filtered.filter(item => {
+            const itemDate = new Date(item.timestamp);
+            return itemDate >= weekAgo;
+          });
+          break;
+        case 'month':
+          const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+          filtered = filtered.filter(item => {
+            const itemDate = new Date(item.timestamp);
+            return itemDate >= monthAgo;
+          });
+          break;
+        case 'custom':
+          if (options.startDate && options.endDate) {
+            const startDate = new Date(options.startDate);
+            const endDate = new Date(options.endDate + 'T23:59:59');
+            filtered = filtered.filter(item => {
+              const itemDate = new Date(item.timestamp);
+              return itemDate >= startDate && itemDate <= endDate;
+            });
+          }
+          break;
+      }
+    }
+
+    // 月份筛选（兼容旧版本）
+    if (options.month) {
+      filtered = filtered.filter(item => {
+        const itemMonth = new Date(item.timestamp).toISOString().slice(0, 7);
+        return itemMonth === options.month;
+      });
+    }
+
+    // 关键词搜索
+    if (options.keyword) {
+      const keyword = options.keyword.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.content.toLowerCase().includes(keyword)
+      );
+    }
+
+    // 设备筛选
+    if (options.deviceId) {
+      filtered = filtered.filter(item => item.deviceId === options.deviceId);
+    }
+
     setFilteredItems(filtered);
   };
 
@@ -217,10 +312,11 @@ ${item.content}`;
             {isMonitoring ? '🟢 已开始监控' : '🔴 已停止监控'}
           </button>
           <button 
-            className="control-btn test"
-            onClick={readClipboard}
+            className="control-btn filter"
+            onClick={() => setShowFilter(!showFilter)}
+            title={showFilter ? '隐藏筛选面板' : '显示筛选面板'}
           >
-            📋 手动测试剪切板
+            🔍 {showFilter ? '隐藏筛选' : '展开筛选'}
           </button>
           <button 
             className="control-btn clear"
@@ -282,6 +378,52 @@ ${item.content}`;
           >
             {darkTheme ? '☀️ 亮色主题' : '🌙 暗色主题'}
           </button>
+          
+          {/* 搜索功能 */}
+          <div className="search-container">
+            <button 
+              className="control-btn search"
+              onClick={() => setShowSearch(!showSearch)}
+              title="快速搜索"
+            >
+              🔍
+            </button>
+            {showSearch && (
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="搜索剪切板内容..."
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      performGlobalSearch(searchKeyword);
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="search-buttons">
+                  <button 
+                    className="search-btn-clear"
+                    onClick={() => {
+                      setSearchKeyword('');
+                      setFilteredItems([]);
+                      setShowSearch(false);
+                      setIsSearchMode(false);
+                    }}
+                  >
+                    清除
+                  </button>
+                  <button 
+                    className="search-btn-primary"
+                    onClick={() => performGlobalSearch(searchKeyword)}
+                  >
+                    搜索
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         {isElectron && (
           <div className="electron-info">

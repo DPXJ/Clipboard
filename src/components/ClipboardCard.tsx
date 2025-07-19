@@ -24,6 +24,12 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
   const [showFullContent, setShowFullContent] = useState(false);
   const [flomoSyncing, setFlomoSyncing] = useState(false);
   const [flomoSyncResult, setFlomoSyncResult] = useState<'success' | 'error' | null>(null);
+  
+  // 检查是否已同步到Flomo (持久化状态)
+  const [isFlomoSynced, setIsFlomoSynced] = useState(() => {
+    const syncedItems = JSON.parse(localStorage.getItem('flomo_synced_items') || '[]');
+    return syncedItems.includes(item.id);
+  });
 
   // 时间格式化
   const formattedTime = useMemo(() => {
@@ -168,6 +174,15 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
 
       if (response.ok) {
         setFlomoSyncResult('success');
+        
+        // 保存同步状态到localStorage
+        const syncedItems = JSON.parse(localStorage.getItem('flomo_synced_items') || '[]');
+        if (!syncedItems.includes(item.id)) {
+          syncedItems.push(item.id);
+          localStorage.setItem('flomo_synced_items', JSON.stringify(syncedItems));
+          setIsFlomoSynced(true);
+        }
+        
         setTimeout(() => setFlomoSyncResult(null), 3000);
       } else {
         setFlomoSyncResult('error');
@@ -198,12 +213,19 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
             {copied ? <Check size={16} /> : <Copy size={16} />}
           </button>
           <button
-            className={`card-btn flomo ${flomoSyncing ? 'syncing' : ''} ${flomoSyncResult === 'success' ? 'success' : flomoSyncResult === 'error' ? 'error' : ''}`}
+            className={`card-btn flomo ${flomoSyncing ? 'syncing' : ''} ${flomoSyncResult === 'success' ? 'success' : flomoSyncResult === 'error' ? 'error' : ''} ${isFlomoSynced ? 'synced' : ''}`}
             onClick={syncToFlomo}
-            title={flomoSyncing ? '同步中...' : flomoSyncResult === 'success' ? '同步成功' : flomoSyncResult === 'error' ? '同步失败' : '同步到Flomo'}
+            title={
+              flomoSyncing ? '同步中...' : 
+              flomoSyncResult === 'success' ? '同步成功' : 
+              flomoSyncResult === 'error' ? '同步失败' : 
+              isFlomoSynced ? '已同步到Flomo' : '同步到Flomo'
+            }
             disabled={flomoSyncing}
           >
-            <span className="flomo-icon">F</span>
+            <span className="flomo-icon">
+              {isFlomoSynced ? '✓' : 'F'}
+            </span>
           </button>
           <button
             className={`card-btn delete ${showDeleteConfirm ? 'confirm' : ''}`}
