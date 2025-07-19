@@ -126,7 +126,8 @@ function App() {
 
   // 导出为TXT文件
   const exportToTxt = () => {
-    const itemsToExport = filteredItems.length > 0 ? filteredItems : clipboardItems;
+    // 根据搜索模式决定导出的数据
+    const itemsToExport = isSearchMode ? filteredItems : (filteredItems.length > 0 ? filteredItems : clipboardItems);
     
     // 生成文件头部信息
     const now = new Date();
@@ -324,6 +325,7 @@ ${item.content}`;
               localStorage.clearAllItems();
               setClipboardItems([]);
               setFilteredItems([]);
+              setIsSearchMode(false);
             }}
             disabled={clipboardItems.length === 0}
           >
@@ -333,7 +335,10 @@ ${item.content}`;
           <button 
             className="control-btn export"
             onClick={exportToTxt}
-            disabled={clipboardItems.length === 0}
+            disabled={(() => {
+              const itemsToExport = isSearchMode ? filteredItems : (filteredItems.length > 0 ? filteredItems : clipboardItems);
+              return itemsToExport.length === 0;
+            })()}
           >
             📄 导出TXT
           </button>
@@ -397,6 +402,8 @@ ${item.content}`;
                   onChange={(e) => setSearchKeyword(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
+                      e.preventDefault();
+                      console.log('Enter键按下，开始搜索:', searchKeyword);
                       performGlobalSearch(searchKeyword);
                     }
                   }}
@@ -412,7 +419,7 @@ ${item.content}`;
                       setIsSearchMode(false);
                     }}
                   >
-                    清除
+                    重置
                   </button>
                   <button 
                     className="search-btn-primary"
@@ -443,34 +450,43 @@ ${item.content}`;
       />
 
       <main className="app-main">
-        {(filteredItems.length > 0 ? filteredItems : clipboardItems).length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📋</div>
-            <h3>暂无剪切板记录</h3>
-            <p>监控已开启，复制任何内容都会自动记录</p>
-            {isElectron && (
-              <p className="debug-info">
-                调试信息: Electron环境已检测到，监控状态: {isMonitoring ? '已开启' : '已关闭'}
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="clipboard-grid">
-            {(filteredItems.length > 0 ? filteredItems : clipboardItems).map((item) => (
-              <ClipboardCard
-                key={item.id}
-                item={item}
-                onDelete={(id) => {
-                  localStorage.deleteClipboardItem(id);
-                  setClipboardItems(prev => prev.filter(item => item.id !== id));
-                  setFilteredItems(prev => prev.filter(item => item.id !== id));
-                }}
-                isElectron={isElectron}
-                darkTheme={darkTheme}
-              />
-            ))}
-          </div>
-        )}
+        {(() => {
+          // 根据搜索模式决定显示的数据
+          const displayItems = isSearchMode ? filteredItems : (filteredItems.length > 0 ? filteredItems : clipboardItems);
+          
+          if (displayItems.length === 0) {
+            return (
+              <div className="empty-state">
+                <div className="empty-icon">📋</div>
+                <h3>{isSearchMode ? '未找到匹配的记录' : '暂无剪切板记录'}</h3>
+                <p>{isSearchMode ? '请尝试其他关键词或清除搜索条件' : '监控已开启，复制任何内容都会自动记录'}</p>
+                {!isSearchMode && isElectron && (
+                  <p className="debug-info">
+                    调试信息: Electron环境已检测到，监控状态: {isMonitoring ? '已开启' : '已关闭'}
+                  </p>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <div className="clipboard-grid">
+              {displayItems.map((item) => (
+                <ClipboardCard
+                  key={item.id}
+                  item={item}
+                  onDelete={(id) => {
+                    localStorage.deleteClipboardItem(id);
+                    setClipboardItems(prev => prev.filter(item => item.id !== id));
+                    setFilteredItems(prev => prev.filter(item => item.id !== id));
+                  }}
+                  isElectron={isElectron}
+                  darkTheme={darkTheme}
+                />
+              ))}
+            </div>
+          );
+        })()}
       </main>
 
       {/* Flomo配置模态框 */}
