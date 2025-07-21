@@ -24,10 +24,18 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
   const [showFullContent, setShowFullContent] = useState(false);
   const [flomoSyncing, setFlomoSyncing] = useState(false);
   const [flomoSyncResult, setFlomoSyncResult] = useState<'success' | 'error' | null>(null);
+  const [feishuSyncing, setFeishuSyncing] = useState(false);
+  const [feishuSyncResult, setFeishuSyncResult] = useState<'success' | 'error' | null>(null);
   
   // 检查是否已同步到Flomo (持久化状态)
   const [isFlomoSynced, setIsFlomoSynced] = useState(() => {
     const syncedItems = JSON.parse(localStorage.getItem('flomo_synced_items') || '[]');
+    return syncedItems.includes(item.id);
+  });
+
+  // 检查是否已同步到飞书 (持久化状态)
+  const [isFeishuSynced, setIsFeishuSynced] = useState(() => {
+    const syncedItems = JSON.parse(localStorage.getItem('feishu_synced_items') || '[]');
     return syncedItems.includes(item.id);
   });
 
@@ -197,6 +205,94 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
     }
   }, [item.content]);
 
+  // 同步到飞书
+  const syncToFeishu = useCallback(async () => {
+    // 检查是否已配置飞书API
+    const savedConfig = localStorage.getItem('feishu-config');
+    if (!savedConfig) {
+      alert('请先配置飞书API。点击VIP按钮 -> 同步飞书表格进行配置。');
+      return;
+    }
+
+    let config;
+    try {
+      config = JSON.parse(savedConfig);
+    } catch (error) {
+      alert('飞书配置解析失败，请重新配置。');
+      return;
+    }
+
+    if (!config.enabled || !config.appId || !config.appSecret || !config.appToken || !config.tableId) {
+      alert('飞书API配置不完整，请重新配置。');
+      return;
+    }
+
+    setFeishuSyncing(true);
+    setFeishuSyncResult(null);
+
+    try {
+      // 1. 获取access token
+      const tokenResponse = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          app_id: config.appId,
+          app_secret: config.appSecret,
+        }),
+      });
+
+      const tokenData = await tokenResponse.json();
+      if (tokenData.code !== 0) {
+        throw new Error(`获取token失败: ${tokenData.msg}`);
+      }
+
+      // 2. 创建记录
+      const createResponse = await fetch(
+        `https://open.feishu.cn/open-apis/bitable/v1/apps/${config.appToken}/tables/${config.tableId}/records`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${tokenData.tenant_access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fields: {
+              '内容': item.content,
+              '时间': new Date(item.timestamp).toISOString(),
+              '设备': item.deviceId || '未知设备',
+              '状态': '已同步'
+            }
+          })
+        }
+      );
+
+      if (createResponse.ok) {
+        setFeishuSyncResult('success');
+        
+        // 保存同步状态到localStorage
+        const syncedItems = JSON.parse(localStorage.getItem('feishu_synced_items') || '[]');
+        if (!syncedItems.includes(item.id)) {
+          syncedItems.push(item.id);
+          localStorage.setItem('feishu_synced_items', JSON.stringify(syncedItems));
+          setIsFeishuSynced(true);
+        }
+        
+        setTimeout(() => setFeishuSyncResult(null), 3000);
+      } else {
+        const errorData = await createResponse.json();
+        throw new Error(`创建记录失败: ${errorData.msg || '未知错误'}`);
+      }
+    } catch (error) {
+      console.error('飞书同步失败:', error);
+      setFeishuSyncResult('error');
+      setTimeout(() => setFeishuSyncResult(null), 3000);
+    } finally {
+      setFeishuSyncing(false);
+    }
+  }, [item.content, item.timestamp, item.deviceId]);
+
   return (
     <div className={`clipboard-card ${darkTheme ? 'dark-theme' : 'light-theme'} ${showFullContent ? 'expanded' : ''}`}>
       <div className="card-header">
@@ -225,6 +321,21 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
           >
             <span className="flomo-icon">
               {isFlomoSynced ? '✓' : 'F'}
+            </span>
+          </button>
+          <button
+            className={`card-btn feishu ${feishuSyncing ? 'syncing' : ''} ${feishuSyncResult === 'success' ? 'success' : feishuSyncResult === 'error' ? 'error' : ''} ${isFeishuSynced ? 'synced' : ''}`}
+            onClick={syncToFeishu}
+            title={
+              feishuSyncing ? '同步中...' : 
+              feishuSyncResult === 'success' ? '同步成功' : 
+              feishuSyncResult === 'error' ? '同步失败' : 
+              isFeishuSynced ? '已同步到飞书' : '同步到飞书'
+            }
+            disabled={feishuSyncing}
+          >
+            <span className="feishu-icon">
+              {isFeishuSynced ? '✓' : '飞'}
             </span>
           </button>
           <button

@@ -185,6 +185,84 @@
   background: rgba(158, 158, 158, 0.1);
 }
 
+/* 飞书同步按钮样式 - 亮色主题 */
+.clipboard-card.light-theme .card-btn.feishu {
+  background: rgba(78, 171, 243, 0.1);
+  border-color: rgba(78, 171, 243, 0.3);
+  color: #4eabf3;
+}
+
+.clipboard-card.light-theme .card-btn.feishu:hover {
+  background: rgba(78, 171, 243, 0.15);
+  border-color: rgba(78, 171, 243, 0.5);
+}
+
+.clipboard-card.light-theme .card-btn.feishu.syncing {
+  background: rgba(33, 150, 243, 0.15);
+  border-color: rgba(33, 150, 243, 0.3);
+  color: #2196f3;
+}
+
+.clipboard-card.light-theme .card-btn.feishu.success {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.clipboard-card.light-theme .card-btn.feishu.error {
+  background: rgba(244, 67, 54, 0.15);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+/* 飞书按钮图标样式 - 亮色主题 */
+.clipboard-card.light-theme .card-btn.feishu .feishu-icon {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4eabf3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: rgba(78, 171, 243, 0.15);
+  text-align: center;
+  line-height: 1;
+}
+
+.clipboard-card.light-theme .card-btn.feishu.syncing .feishu-icon {
+  color: #2196f3;
+  background: rgba(33, 150, 243, 0.15);
+}
+
+.clipboard-card.light-theme .card-btn.feishu.success .feishu-icon {
+  color: #4caf50;
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.clipboard-card.light-theme .card-btn.feishu.error .feishu-icon {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.15);
+}
+
+.clipboard-card.light-theme .card-btn.feishu.synced {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+  border-color: rgba(158, 158, 158, 0.2);
+  cursor: default;
+}
+
+.clipboard-card.light-theme .card-btn.feishu.synced:hover {
+  background: rgba(158, 158, 158, 0.1);
+  transform: none;
+}
+
+.clipboard-card.light-theme .card-btn.feishu.synced .feishu-icon {
+  color: #9e9e9e;
+  background: rgba(158, 158, 158, 0.1);
+}
+
 .clipboard-card.light-theme .show-full-btn {
   background: rgba(103, 58, 183, 0.1);
   color: #673ab7;
@@ -371,6 +449,85 @@
 }
 
 .clipboard-card.dark-theme .card-btn.flomo.synced .flomo-icon {
+  color: #9e9e9e;
+  background: rgba(158, 158, 158, 0.15);
+}
+
+/* 飞书同步按钮样式 - 暗色主题 */
+.clipboard-card.dark-theme .card-btn.feishu {
+  background: #1e2a3a;
+  border-color: rgba(78, 171, 243, 0.3);
+  color: #4eabf3;
+}
+
+.clipboard-card.dark-theme .card-btn.feishu:hover {
+  background: #2e3a4a;
+  border-color: rgba(78, 171, 243, 0.5);
+  color: #64b5f6;
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.syncing {
+  background: #1e2a3a;
+  border-color: rgba(33, 150, 243, 0.3);
+  color: #2196f3;
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.success {
+  background: #1e3a1e;
+  border-color: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.error {
+  background: #3a1e1e;
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+/* 飞书按钮图标样式 - 暗色主题 */
+.clipboard-card.dark-theme .card-btn.feishu .feishu-icon {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4eabf3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: rgba(78, 171, 243, 0.15);
+  text-align: center;
+  line-height: 1;
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.syncing .feishu-icon {
+  color: #2196f3;
+  background: rgba(33, 150, 243, 0.15);
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.success .feishu-icon {
+  color: #4caf50;
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.error .feishu-icon {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.15);
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.synced {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+  border-color: rgba(158, 158, 158, 0.2);
+  cursor: default;
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.synced:hover {
+  background: rgba(158, 158, 158, 0.1);
+  transform: none;
+}
+
+.clipboard-card.dark-theme .card-btn.feishu.synced .feishu-icon {
   color: #9e9e9e;
   background: rgba(158, 158, 158, 0.15);
 }

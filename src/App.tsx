@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ClipboardCard from './components/ClipboardCard';
 import DataFilter from './components/DataFilter';
 import FlomoConfigModal from './components/FlomoConfigModal';
+import FeishuConfigModal from './components/FeishuConfigModal';
 import { localStorage } from './utils/storage';
 import './App.css';
 
@@ -39,6 +40,7 @@ function App() {
   const [darkTheme, setDarkTheme] = useState(false); // 默认亮色主题
   const [showVipDropdown, setShowVipDropdown] = useState(false);
   const [showFlomoConfig, setShowFlomoConfig] = useState(false);
+  const [showFeishuConfig, setShowFeishuConfig] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
@@ -367,12 +369,11 @@ ${item.content}`;
                 <button 
                   className="dropdown-item"
                   onClick={() => {
-                    // TODO: 实现飞书多维表格同步
-                    alert('飞书多维表格同步功能即将上线');
+                    setShowFeishuConfig(true);
                     setShowVipDropdown(false);
                   }}
                 >
-                  📊 同步飞书多维表格
+                  📊 同步飞书表格
                 </button>
               </div>
             )}
@@ -493,6 +494,13 @@ ${item.content}`;
       <FlomoConfigModal
         isOpen={showFlomoConfig}
         onClose={() => setShowFlomoConfig(false)}
+        darkTheme={darkTheme}
+      />
+
+      {/* 飞书配置模态框 */}
+      <FeishuConfigModal
+        isOpen={showFeishuConfig}
+        onClose={() => setShowFeishuConfig(false)}
         darkTheme={darkTheme}
       />
     </div>

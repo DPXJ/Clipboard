@@ -1,153 +1,241 @@
 import React, { useState, useEffect } from 'react';
-import { FeishuConfig, AppSettings } from '../utils/storage';
 import './FeishuConfigModal.css';
+
+interface FeishuConfig {
+  appId: string;
+  appSecret: string;
+  appToken: string;
+  tableId: string;
+  enabled: boolean;
+}
 
 interface FeishuConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (config: FeishuConfig) => void;
-  currentConfig: FeishuConfig;
+  darkTheme: boolean;
 }
 
-const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({
-  isOpen,
-  onClose,
-  onSave,
-  currentConfig
-}) => {
-  const [config, setConfig] = useState<FeishuConfig>(currentConfig);
-  const [isValid, setIsValid] = useState(false);
+const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({ isOpen, onClose, darkTheme }) => {
+  const [config, setConfig] = useState<FeishuConfig>({
+    appId: '',
+    appSecret: '',
+    appToken: '',
+    tableId: '',
+    enabled: false
+  });
 
+  const [testResult, setTestResult] = useState<{
+    type: 'success' | 'error' | null;
+    message: string;
+  }>({ type: null, message: '' });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 加载保存的配置
   useEffect(() => {
-    setConfig(currentConfig);
-  }, [currentConfig]);
+    if (isOpen) {
+      const savedConfig = localStorage.getItem('feishu-config');
+      if (savedConfig) {
+        setConfig(JSON.parse(savedConfig));
+      }
+    }
+  }, [isOpen]);
 
-  useEffect(() => {
-    // 验证配置是否完整
-    const valid = config.appId.trim() !== '' && 
-                  config.appSecret.trim() !== '' && 
-                  config.appToken.trim() !== '' && 
-                  config.tableId.trim() !== '';
-    setIsValid(valid);
-  }, [config]);
-
-  const handleInputChange = (field: keyof FeishuConfig, value: string) => {
-    setConfig(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSave = () => {
-    if (isValid) {
-      onSave(config);
-      onClose();
+  const handleSave = async () => {
+    try {
+      // 保存配置
+      localStorage.setItem('feishu-config', JSON.stringify(config));
+      setTestResult({ type: 'success', message: '配置保存成功！' });
+      
+      setTimeout(() => {
+        onClose();
+        setTestResult({ type: null, message: '' });
+      }, 1500);
+    } catch (error) {
+      setTestResult({ type: 'error', message: '保存失败：' + error });
     }
   };
 
-  const handleTestConnection = async () => {
-    // TODO: 实现飞书API连接测试
-    alert('飞书API连接测试功能将在后续版本中实现');
+  const handleTest = async () => {
+    if (!config.appId || !config.appSecret) {
+      setTestResult({ type: 'error', message: '请填入App ID和App Secret' });
+      return;
+    }
+
+    setIsLoading(true);
+    setTestResult({ type: null, message: '' });
+
+    try {
+      // 测试获取access token
+      const tokenResponse = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          app_id: config.appId,
+          app_secret: config.appSecret,
+        }),
+      });
+
+      const tokenData = await tokenResponse.json();
+      
+      if (tokenData.code === 0) {
+        setTestResult({ type: 'success', message: '连接成功！API配置有效。' });
+      } else {
+        setTestResult({ type: 'error', message: `连接失败：${tokenData.msg || '未知错误'}` });
+      }
+    } catch (error) {
+      setTestResult({ type: 'error', message: '连接失败：网络错误或API地址不可达' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setTestResult({ type: null, message: '' });
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h2>🪶 飞书同步配置</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+    <div className={`feishu-modal-overlay ${darkTheme ? 'dark' : 'light'}`}>
+      <div className="feishu-modal-content">
+        <div className="feishu-modal-header">
+          <h2>📊 飞书表格配置</h2>
+          <button className="feishu-close-btn" onClick={handleClose}>×</button>
         </div>
 
-        <div className="modal-body">
-          <div className="config-section">
-            <h3>应用配置</h3>
-            <div className="form-group">
-              <label>App ID *</label>
+        <div className="feishu-modal-body">
+          <div className="feishu-config-section">
+            <h3>🔑 应用信息</h3>
+            <p className="feishu-config-tip">
+              在飞书开放平台创建企业自建应用后获取
+            </p>
+            
+            <div className="feishu-input-group">
+              <label>App ID</label>
               <input
                 type="text"
+                placeholder="cli_xxxxxxxxxxxx"
                 value={config.appId}
-                onChange={(e) => handleInputChange('appId', e.target.value)}
-                placeholder="请输入飞书应用的App ID"
+                onChange={(e) => setConfig({ ...config, appId: e.target.value })}
+                className="feishu-input"
               />
             </div>
 
-            <div className="form-group">
-              <label>App Secret *</label>
+            <div className="feishu-input-group">
+              <label>App Secret</label>
               <input
                 type="password"
+                placeholder="应用密钥"
                 value={config.appSecret}
-                onChange={(e) => handleInputChange('appSecret', e.target.value)}
-                placeholder="请输入飞书应用的App Secret"
+                onChange={(e) => setConfig({ ...config, appSecret: e.target.value })}
+                className="feishu-input"
               />
             </div>
           </div>
 
-          <div className="config-section">
-            <h3>表格配置</h3>
-            <div className="form-group">
-              <label>App Token *</label>
+          <div className="feishu-config-section">
+            <h3>📋 表格信息</h3>
+            <p className="feishu-config-tip">
+              从多维表格URL中获取：https://feishu.cn/base/<strong>appToken</strong>?table=<strong>tableId</strong>
+            </p>
+            
+            <div className="feishu-input-group">
+              <label>App Token (多维表格ID)</label>
               <input
                 type="text"
+                placeholder="bascnxxxxxxxxxxxxxxx"
                 value={config.appToken}
-                onChange={(e) => handleInputChange('appToken', e.target.value)}
-                placeholder="请输入多维表格的App Token"
+                onChange={(e) => setConfig({ ...config, appToken: e.target.value })}
+                className="feishu-input"
               />
-              <small>在飞书多维表格URL中可以找到</small>
             </div>
 
-            <div className="form-group">
-              <label>Table ID *</label>
+            <div className="feishu-input-group">
+              <label>Table ID (数据表ID)</label>
               <input
                 type="text"
+                placeholder="tblxxxxxxxxxxxxxxx"
                 value={config.tableId}
-                onChange={(e) => handleInputChange('tableId', e.target.value)}
-                placeholder="请输入表格的Table ID"
+                onChange={(e) => setConfig({ ...config, tableId: e.target.value })}
+                className="feishu-input"
               />
-              <small>在表格设置中可以找到</small>
             </div>
           </div>
 
-          <div className="config-section">
-            <h3>同步设置</h3>
-            <div className="form-group">
-              <label className="checkbox-label">
+          <div className="feishu-config-section">
+            <div className="feishu-switch-group">
+              <label className="feishu-switch">
                 <input
                   type="checkbox"
                   checked={config.enabled}
-                  onChange={(e) => handleInputChange('enabled', e.target.checked.toString())}
+                  onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
                 />
-                启用飞书同步
+                <span className="feishu-slider"></span>
               </label>
+              <span className="feishu-switch-label">启用飞书同步</span>
             </div>
           </div>
 
-          <div className="help-section">
-            <h4>📖 配置说明</h4>
-            <ol>
-              <li>在 <a href="https://open.feishu.cn/" target="_blank" rel="noopener noreferrer">飞书开放平台</a> 创建应用</li>
-              <li>获取应用的 App ID 和 App Secret</li>
-              <li>在飞书中创建多维表格，获取 App Token 和 Table ID</li>
-              <li>配置应用权限（多维表格读写权限）</li>
-            </ol>
-          </div>
+          {testResult.type && (
+            <div className={`feishu-test-result ${testResult.type}`}>
+              {testResult.message}
+            </div>
+          )}
         </div>
 
-        <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
-            取消
-          </button>
-          <button className="btn btn-test" onClick={handleTestConnection}>
-            测试连接
+        <div className="feishu-modal-footer">
+          <button 
+            className="feishu-btn feishu-test-btn" 
+            onClick={handleTest}
+            disabled={isLoading}
+          >
+            {isLoading ? '测试中...' : '🔍 测试连接'}
           </button>
           <button 
-            className="btn btn-primary" 
+            className="feishu-btn feishu-save-btn" 
             onClick={handleSave}
-            disabled={!isValid}
           >
-            保存配置
+            💾 保存配置
           </button>
+          <button 
+            className="feishu-btn feishu-cancel-btn" 
+            onClick={handleClose}
+          >
+            取消
+          </button>
+        </div>
+
+        <div className="feishu-help-section">
+          <details>
+            <summary>📖 配置帮助</summary>
+            <div className="feishu-help-content">
+              <h4>1. 创建飞书应用</h4>
+              <p>访问 <a href="https://open.feishu.cn/app" target="_blank">飞书开放平台</a> 创建企业自建应用</p>
+              
+              <h4>2. 申请权限</h4>
+              <p>为应用申请以下权限：</p>
+              <ul>
+                <li>bitable:app - 多维表格应用权限</li>
+                <li>bitable:record - 记录读写权限</li>
+              </ul>
+              
+              <h4>3. 获取表格ID</h4>
+              <p>在多维表格URL中：https://xxx.feishu.cn/base/<strong>appToken</strong>?table=<strong>tableId</strong></p>
+              
+              <h4>4. 表格字段要求</h4>
+              <p>请确保表格包含以下字段：</p>
+              <ul>
+                <li>内容 - 多行文本</li>
+                <li>时间 - 日期时间</li>
+                <li>设备 - 单行文本</li>
+                <li>状态 - 单选（可选）</li>
+              </ul>
+            </div>
+          </details>
         </div>
       </div>
     </div>

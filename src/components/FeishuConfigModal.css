@@ -1,222 +1,373 @@
-.modal-overlay {
+/* 飞书配置模态框 - 简化版本 */
+.feishu-modal-overlay {
   position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+.feishu-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.feishu-modal-overlay.dark .feishu-modal-content {
+  background: #1f2937;
+  color: white;
+}
+
+.feishu-modal-header {
+  background: linear-gradient(135deg, #4285f4, #34a853);
+  color: white;
+  padding: 20px;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.feishu-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.feishu-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feishu-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.feishu-modal-body {
+  padding: 20px;
+}
+
+.feishu-config-section {
+  margin-bottom: 20px;
+}
+
+.feishu-config-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.feishu-modal-overlay.dark .feishu-config-section h3 {
+  color: white;
+  border-bottom-color: #444;
+}
+
+.feishu-config-tip {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.feishu-modal-overlay.dark .feishu-config-tip {
+  color: #ccc;
+}
+
+.feishu-config-tip strong {
+  color: #4285f4;
+  font-weight: 600;
+}
+
+.feishu-input-group {
+  margin-bottom: 15px;
+}
+
+.feishu-input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.feishu-modal-overlay.dark .feishu-input-group label {
+  color: #ccc;
+}
+
+.feishu-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.feishu-modal-overlay.dark .feishu-input {
+  background: #374151;
+  border-color: #555;
+  color: white;
+}
+
+.feishu-input:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.feishu-input::placeholder {
+  color: #999;
+}
+
+.feishu-switch-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feishu-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+}
+
+.feishu-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.feishu-slider {
+  position: absolute;
+  cursor: pointer;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 22px;
 }
 
-.modal-content {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 16px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #ffffff;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
+.feishu-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
   border-radius: 50%;
-  transition: background-color 0.3s ease;
 }
 
-.close-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+.feishu-switch input:checked + .feishu-slider {
+  background-color: #4285f4;
 }
 
-.modal-body {
-  padding: 1.5rem;
+.feishu-switch input:checked + .feishu-slider:before {
+  transform: translateX(22px);
 }
 
-.config-section {
-  margin-bottom: 2rem;
+.feishu-switch-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
 }
 
-.config-section h3 {
-  color: #ffffff;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 0.5rem;
+.feishu-modal-overlay.dark .feishu-switch-label {
+  color: #ccc;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
+.feishu-test-result {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-top: 15px;
+  font-size: 14px;
   font-weight: 500;
 }
 
-.form-group input[type="text"],
-.form-group input[type="password"] {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  font-size: 0.9rem;
-  transition: border-color 0.3s ease;
+.feishu-test-result.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
-.form-group input:focus {
-  outline: none;
-  border-color: #4A90E2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+.feishu-test-result.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 
-.form-group small {
-  display: block;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
-  margin-top: 0.25rem;
+.feishu-modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+  border-top: 1px solid #eee;
+  background: #f9f9f9;
+  border-radius: 0 0 12px 12px;
 }
 
-.checkbox-label {
-  display: flex !important;
-  align-items: center;
+.feishu-modal-overlay.dark .feishu-modal-footer {
+  background: #111827;
+  border-top-color: #333;
+}
+
+.feishu-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  margin-bottom: 0 !important;
+  transition: all 0.2s;
+  flex: 1;
 }
 
-.checkbox-label input[type="checkbox"] {
-  margin-right: 0.5rem;
-  width: auto;
+.feishu-test-btn {
+  background: #f0f0f0;
+  color: #333;
 }
 
-.help-section {
-  background: rgba(74, 144, 226, 0.1);
-  border: 1px solid rgba(74, 144, 226, 0.3);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1rem;
+.feishu-test-btn:hover:not(:disabled) {
+  background: #e0e0e0;
 }
 
-.help-section h4 {
-  color: #4A90E2;
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
+.feishu-test-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.help-section ol {
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-  padding-left: 1.5rem;
+.feishu-save-btn {
+  background: #4285f4;
+  color: white;
 }
 
-.help-section li {
-  margin-bottom: 0.25rem;
+.feishu-save-btn:hover {
+  background: #3367d6;
 }
 
-.help-section a {
-  color: #4A90E2;
+.feishu-cancel-btn {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.feishu-cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.feishu-help-section {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.feishu-modal-overlay.dark .feishu-help-section {
+  background: #111827;
+  border-color: #333;
+}
+
+.feishu-help-section details {
+  margin-bottom: 10px;
+}
+
+.feishu-help-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #333;
+  padding: 5px 0;
+}
+
+.feishu-modal-overlay.dark .feishu-help-section summary {
+  color: #ccc;
+}
+
+.feishu-help-content {
+  margin-top: 10px;
+  color: #666;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.feishu-modal-overlay.dark .feishu-help-content {
+  color: #999;
+}
+
+.feishu-help-content h4 {
+  color: #333;
+  margin: 10px 0 5px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.feishu-modal-overlay.dark .feishu-help-content h4 {
+  color: #ccc;
+}
+
+.feishu-help-content h4:first-child {
+  margin-top: 0;
+}
+
+.feishu-help-content p, .feishu-help-content ul {
+  margin: 5px 0;
+}
+
+.feishu-help-content ul {
+  padding-left: 20px;
+}
+
+.feishu-help-content li {
+  margin: 3px 0;
+}
+
+.feishu-help-content a {
+  color: #4285f4;
   text-decoration: none;
 }
 
-.help-section a:hover {
+.feishu-help-content a:hover {
   text-decoration: underline;
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 100px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-test {
-  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-  color: white;
-}
-
-.btn-test:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
-}
-
 @media (max-width: 768px) {
-  .modal-content {
+  .feishu-modal-content {
     width: 95%;
-    margin: 1rem;
+    max-height: 90vh;
   }
   
-  .modal-footer {
+  .feishu-modal-footer {
     flex-direction: column;
   }
   
-  .btn {
+  .feishu-btn {
     width: 100%;
   }
 } 
