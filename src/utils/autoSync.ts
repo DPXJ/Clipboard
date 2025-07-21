@@ -74,7 +74,6 @@ export const autoSyncToFeishu = async (item: ClipboardItem): Promise<boolean> =>
     const recordData = {
       fields: {
         '内容': item.content,
-        '日期': Math.floor(new Date(item.timestamp).getTime() / 1000), // 使用时间戳格式
         '设备': item.deviceId || '未知设备',
         '状态': '已同步'
       }

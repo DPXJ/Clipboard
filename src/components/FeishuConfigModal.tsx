@@ -260,10 +260,10 @@ const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({ isOpen, onClose, 
               <p>请确保表格包含以下字段：</p>
               <ul>
                 <li>内容 - 多行文本</li>
-                <li>时间 - 日期时间</li>
                 <li>设备 - 单行文本</li>
                 <li>状态 - 单选（可选）</li>
               </ul>
+              <p><strong>注意：</strong>时间字段将使用飞书表格的"创建时间"自动生成</p>
             </div>
           </details>
         </div>

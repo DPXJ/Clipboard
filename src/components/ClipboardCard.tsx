@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Copy, Trash2, Check, Tag, Monitor, Cloud, FileText } from 'lucide-react';
 import './ClipboardCard.css';
 
@@ -38,6 +38,15 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
     const syncedItems = JSON.parse(localStorage.getItem('feishu_synced_items') || '[]');
     return syncedItems.includes(item.id);
   });
+
+  // 监听syncStatus变化，更新飞书同步状态
+  useEffect(() => {
+    if (item.syncStatus === 'synced') {
+      setIsFeishuSynced(true);
+    } else if (item.syncStatus === 'failed') {
+      setIsFeishuSynced(false);
+    }
+  }, [item.syncStatus]);
 
   // 时间格式化
   const formattedTime = useMemo(() => {
@@ -251,11 +260,10 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
       // 清理Table ID，移除可能的view参数
       const cleanTableId = config.tableId.split('&')[0];
       
-      // 2. 创建记录
+            // 2. 创建记录
       const recordData = {
         fields: {
           '内容': item.content,
-          '日期': Math.floor(new Date(item.timestamp).getTime() / 1000), // 使用时间戳格式
           '设备': item.deviceId || '未知设备',
           '状态': '已同步'
         }
