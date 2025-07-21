@@ -248,27 +248,40 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
         throw new Error(`获取token失败: ${tokenData.msg}`);
       }
 
+      // 清理Table ID，移除可能的view参数
+      const cleanTableId = config.tableId.split('&')[0];
+      
       // 2. 创建记录
+      const recordData = {
+        fields: {
+          '内容': item.content,
+          '日期': Math.floor(new Date(item.timestamp).getTime() / 1000), // 使用时间戳格式
+          '设备': item.deviceId || '未知设备',
+          '状态': '已同步'
+        }
+      };
+      
+      console.log('发送到飞书的数据:', recordData);
+      console.log('原始Table ID:', config.tableId);
+      console.log('清理后Table ID:', cleanTableId);
+      console.log('API URL:', `https://open.feishu.cn/open-apis/bitable/v1/apps/${config.appToken}/tables/${cleanTableId}/records`);
+      
       const createResponse = await fetch(
-        `https://open.feishu.cn/open-apis/bitable/v1/apps/${config.appToken}/tables/${config.tableId}/records`,
+        `https://open.feishu.cn/open-apis/bitable/v1/apps/${config.appToken}/tables/${cleanTableId}/records`,
         {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${tokenData.tenant_access_token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            fields: {
-              '内容': item.content,
-              '时间': new Date(item.timestamp).toISOString(),
-              '设备': item.deviceId || '未知设备',
-              '状态': '已同步'
-            }
-          })
+          body: JSON.stringify(recordData)
         }
       );
 
-      if (createResponse.ok) {
+      const responseData = await createResponse.json();
+      
+      if (createResponse.ok && responseData.code === 0) {
+        console.log('飞书同步成功:', responseData);
         setFeishuSyncResult('success');
         
         // 保存同步状态到localStorage
@@ -281,8 +294,8 @@ const ClipboardCard: React.FC<ClipboardCardProps> = React.memo(({ item, onDelete
         
         setTimeout(() => setFeishuSyncResult(null), 3000);
       } else {
-        const errorData = await createResponse.json();
-        throw new Error(`创建记录失败: ${errorData.msg || '未知错误'}`);
+        console.error('飞书API错误响应:', responseData);
+        throw new Error(`创建记录失败: ${responseData.msg || responseData.error_msg || '未知错误'}`);
       }
     } catch (error) {
       console.error('飞书同步失败:', error);

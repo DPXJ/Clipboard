@@ -163,6 +163,9 @@ const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({ isOpen, onClose, 
                 onChange={(e) => setConfig({ ...config, tableId: e.target.value })}
                 className="feishu-input"
               />
+              <small style={{color: '#666', fontSize: '12px', marginTop: '5px'}}>
+                注意：如果URL包含 &view=xxx，请只保留 table= 后面的部分
+              </small>
             </div>
           </div>
 
@@ -225,6 +228,7 @@ const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({ isOpen, onClose, 
               
               <h4>3. 获取表格ID</h4>
               <p>在多维表格URL中：https://xxx.feishu.cn/base/<strong>appToken</strong>?table=<strong>tableId</strong></p>
+              <p><strong>重要：</strong>如果URL包含 &view=xxx，请只保留 table= 后面的部分作为Table ID</p>
               
               <h4>4. 表格字段要求</h4>
               <p>请确保表格包含以下字段：</p>
