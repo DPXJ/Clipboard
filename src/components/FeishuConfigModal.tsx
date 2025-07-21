@@ -7,6 +7,7 @@ interface FeishuConfig {
   appToken: string;
   tableId: string;
   enabled: boolean;
+  autoSync: boolean;
 }
 
 interface FeishuConfigModalProps {
@@ -21,7 +22,8 @@ const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({ isOpen, onClose, 
     appSecret: '',
     appToken: '',
     tableId: '',
-    enabled: false
+    enabled: false,
+    autoSync: false
   });
 
   const [testResult, setTestResult] = useState<{
@@ -36,7 +38,16 @@ const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({ isOpen, onClose, 
     if (isOpen) {
       const savedConfig = localStorage.getItem('feishu-config');
       if (savedConfig) {
-        setConfig(JSON.parse(savedConfig));
+        const parsedConfig = JSON.parse(savedConfig);
+        // 确保新字段存在，避免配置不兼容
+        setConfig({
+          appId: parsedConfig.appId || '',
+          appSecret: parsedConfig.appSecret || '',
+          appToken: parsedConfig.appToken || '',
+          tableId: parsedConfig.tableId || '',
+          enabled: parsedConfig.enabled || false,
+          autoSync: parsedConfig.autoSync || false
+        });
       }
     }
   }, [isOpen]);
@@ -180,6 +191,21 @@ const FeishuConfigModal: React.FC<FeishuConfigModalProps> = ({ isOpen, onClose, 
                 <span className="feishu-slider"></span>
               </label>
               <span className="feishu-switch-label">启用飞书同步</span>
+            </div>
+            
+            <div className="feishu-switch-group" style={{marginTop: '15px'}}>
+              <label className="feishu-switch">
+                <input
+                  type="checkbox"
+                  checked={config.autoSync}
+                  onChange={(e) => setConfig({ ...config, autoSync: e.target.checked })}
+                  disabled={!config.enabled}
+                />
+                <span className="feishu-slider"></span>
+              </label>
+              <span className="feishu-switch-label" style={{opacity: config.enabled ? 1 : 0.5}}>
+                自动同步（复制后自动同步到飞书）
+              </span>
             </div>
           </div>
 

@@ -4,6 +4,7 @@ import DataFilter from './components/DataFilter';
 import FlomoConfigModal from './components/FlomoConfigModal';
 import FeishuConfigModal from './components/FeishuConfigModal';
 import { localStorage } from './utils/storage';
+import { autoSyncToFeishu, isFeishuAutoSyncEnabled } from './utils/autoSync';
 import './App.css';
 
 // 声明全局Electron API类型
@@ -64,7 +65,7 @@ function App() {
 
     if (electronDetected && window.electronAPI) {
       // 监听剪切板变化
-      window.electronAPI.onClipboardChanged((content) => {
+      window.electronAPI.onClipboardChanged(async (content) => {
         console.log('前端收到剪切板内容变化:', content);
         if (content && content.trim()) {
           const newItem = localStorage.addClipboardItem(content.trim());
@@ -74,6 +75,35 @@ function App() {
               setFilteredItems(updated);
               return updated;
             });
+
+            // 自动同步到飞书
+            if (isFeishuAutoSyncEnabled()) {
+              console.log('飞书自动同步已启用，开始同步新项目');
+              const syncResult = await autoSyncToFeishu(newItem);
+              if (syncResult) {
+                console.log('飞书自动同步成功');
+                // 更新项目的同步状态
+                setClipboardItems(prev => 
+                  prev.map(item => 
+                    item.id === newItem.id 
+                      ? { ...item, syncStatus: 'synced' as const }
+                      : item
+                  )
+                );
+              } else {
+                console.log('飞书自动同步失败');
+                // 更新项目的同步状态
+                setClipboardItems(prev => 
+                  prev.map(item => 
+                    item.id === newItem.id 
+                      ? { ...item, syncStatus: 'failed' as const }
+                      : item
+                  )
+                );
+              }
+            } else {
+              console.log('飞书自动同步未启用');
+            }
           }
         }
       });
@@ -119,6 +149,35 @@ function App() {
             setFilteredItems(updated);
             return updated;
           });
+
+          // 自动同步到飞书
+          if (isFeishuAutoSyncEnabled()) {
+            console.log('飞书自动同步已启用，开始同步新项目');
+            const syncResult = await autoSyncToFeishu(newItem);
+            if (syncResult) {
+              console.log('飞书自动同步成功');
+              // 更新项目的同步状态
+              setClipboardItems(prev => 
+                prev.map(item => 
+                  item.id === newItem.id 
+                    ? { ...item, syncStatus: 'synced' as const }
+                    : item
+                )
+              );
+            } else {
+              console.log('飞书自动同步失败');
+              // 更新项目的同步状态
+              setClipboardItems(prev => 
+                prev.map(item => 
+                  item.id === newItem.id 
+                    ? { ...item, syncStatus: 'failed' as const }
+                    : item
+                )
+              );
+            }
+          } else {
+            console.log('飞书自动同步未启用');
+          }
         }
       }
     } catch (error) {
