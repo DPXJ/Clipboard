@@ -8,20 +8,33 @@ echo.
 
 echo Stopping all related processes...
 
-:: Stop Vite development server
-taskkill /f /im node.exe /fi "WINDOWTITLE eq Vite Server" >nul 2>&1
-
 :: Stop Electron application
 taskkill /f /im electron.exe >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [OK] Electron application stopped
+) else (
+    echo [INFO] No Electron process found
+)
 
-:: Stop any remaining node processes related to this project
-for /f "tokens=2" %%i in ('tasklist /fi "imagename eq node.exe" /fo csv ^| findstr /i "clipboard"') do (
-    taskkill /f /pid %%i >nul 2>&1
+:: Stop Vite development server
+taskkill /f /im node.exe /fi "WINDOWTITLE eq Vite Server" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [OK] Vite server stopped
+) else (
+    echo [INFO] No Vite server process found
+)
+
+:: Stop npm processes
+taskkill /f /im node.exe /fi "WINDOWTITLE eq npm*" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [OK] npm processes stopped
+) else (
+    echo [INFO] No npm processes found
 )
 
 echo.
 echo ========================================
-echo Application stopped!
+echo Application stopped successfully!
 echo ========================================
 echo.
 echo All related processes have been terminated.

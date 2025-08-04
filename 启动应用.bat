@@ -1,8 +1,8 @@
 @echo off
-title Clipboard Monitor - Background Start
+title Clipboard Monitor Launcher
 
 echo ========================================
-echo    Clipboard Monitor - Background Start
+echo    Clipboard Monitor - Starting...
 echo ========================================
 echo.
 
@@ -15,7 +15,7 @@ start /min "Vite Server" cmd /c "npm run dev"
 
 echo.
 echo Waiting for server to start...
-timeout /t 3 /nobreak >nul
+timeout /t 5 /nobreak >nul
 
 echo.
 echo Starting Electron application in background...
@@ -27,12 +27,10 @@ echo Application started in background!
 echo ========================================
 echo.
 echo The application is now running in the background.
-echo You can close this window safely.
+echo This window will close automatically in 3 seconds...
 echo.
-echo To stop the application:
-echo 1. Open Task Manager (Ctrl+Shift+Esc)
-echo 2. Find and end "node.exe" processes
-echo 3. Or restart your computer
+echo To stop the application, run: 停止应用.bat
 echo.
 
-pause 
+timeout /t 3 /nobreak >nul
+exit 
