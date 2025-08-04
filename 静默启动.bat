@@ -2,13 +2,13 @@
 cd /d "%~dp0"
 
 :: Start Vite server silently
-start /min "Vite Server" cmd /c "npm run dev"
+start /min /b "Vite Server" cmd /c "npm run dev >nul 2>&1"
 
 :: Wait for server to start
-timeout /t 5 /nobreak >nul
+ping -n 6 127.0.0.1 >nul
 
 :: Start Electron application silently
-start /min "Electron App" cmd /c "npm run electron"
+start /min /b "Electron App" cmd /c "npm run electron >nul 2>&1"
 
-:: Exit silently
-exit 
+:: Exit silently by killing this window
+taskkill /f /im cmd.exe /fi "WINDOWTITLE eq Clipboard Monitor*" >nul 2>&1 

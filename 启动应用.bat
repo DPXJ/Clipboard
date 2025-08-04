@@ -11,15 +11,15 @@ echo Current directory: %CD%
 echo.
 
 echo Starting Vite server in background...
-start /min "Vite Server" cmd /c "npm run dev"
+start /min /b "Vite Server" cmd /c "npm run dev >nul 2>&1"
 
 echo.
 echo Waiting for server to start...
-timeout /t 5 /nobreak >nul
+ping -n 6 127.0.0.1 >nul
 
 echo.
 echo Starting Electron application in background...
-start /min "Electron App" cmd /c "npm run electron"
+start /min /b "Electron App" cmd /c "npm run electron >nul 2>&1"
 
 echo.
 echo ========================================
@@ -32,5 +32,5 @@ echo.
 echo To stop the application, run: 停止应用.bat
 echo.
 
-timeout /t 3 /nobreak >nul
-exit 
+ping -n 4 127.0.0.1 >nul
+taskkill /f /im cmd.exe /fi "WINDOWTITLE eq Clipboard Monitor Launcher*" >nul 2>&1 
